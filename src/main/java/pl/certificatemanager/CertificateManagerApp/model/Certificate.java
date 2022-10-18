@@ -15,24 +15,17 @@ public class Certificate {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private String issuer;
-
     private String subject;
-
     @Column(name = "serial_number")
     private String serialNumber;
-
     @Column(name = "signature_algorithm")
     private String signatureAlgorithm;
-
     @Column(name = "public_key")
     private String publicKey;
-
     @Column(name = "valid_from")
     @Temporal(TemporalType.TIMESTAMP)
     private Date validFrom;
-
     @Column(name = "valid_to")
     @Temporal(TemporalType.TIMESTAMP)
     private Date validTo;

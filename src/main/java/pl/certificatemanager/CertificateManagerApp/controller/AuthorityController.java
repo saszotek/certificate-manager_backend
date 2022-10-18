@@ -7,20 +7,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pl.certificatemanager.CertificateManagerApp.model.Role;
-import pl.certificatemanager.CertificateManagerApp.service.RoleService;
+import pl.certificatemanager.CertificateManagerApp.model.Authority;
+import pl.certificatemanager.CertificateManagerApp.service.AuthorityService;
 
 import java.net.URI;
 
 @RestController
-@RequestMapping("/role")
+@RequestMapping("/authority")
 @RequiredArgsConstructor
-public class RoleController {
-    private final RoleService roleService;
+public class AuthorityController {
+    private final AuthorityService authorityService;
 
     @PostMapping("/save")
-    public ResponseEntity<Role> saveUser(@RequestBody Role role) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/role/save").toUriString());
-        return ResponseEntity.created(uri).body(roleService.saveRole(role));
+    public ResponseEntity<Authority> saveUser(@RequestBody Authority authority) {
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/authority/save").toUriString());
+        return ResponseEntity.created(uri).body(authorityService.saveAuthority(authority));
     }
 }
