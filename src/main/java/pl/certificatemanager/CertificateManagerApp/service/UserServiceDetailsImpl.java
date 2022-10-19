@@ -6,19 +6,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import pl.certificatemanager.CertificateManagerApp.model.User;
-import pl.certificatemanager.CertificateManagerApp.util.CustomPasswordEncoder;
+import pl.certificatemanager.CertificateManagerApp.repository.UserRepo;
 
 @Service
 public class UserServiceDetailsImpl implements UserDetailsService {
     @Autowired
-    private CustomPasswordEncoder customPasswordEncoder;
+    private UserRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(customPasswordEncoder.getPasswordEncoder().encode("1234"));
-        user.setId(1L);
+        User user = userRepo.findByUsername(username);
         return user;
     }
 }
