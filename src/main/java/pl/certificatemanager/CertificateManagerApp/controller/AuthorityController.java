@@ -13,7 +13,7 @@ import pl.certificatemanager.CertificateManagerApp.service.AuthorityService;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/authority")
+@RequestMapping("/api/authority")
 @RequiredArgsConstructor
 public class AuthorityController {
     private final AuthorityService authorityService;

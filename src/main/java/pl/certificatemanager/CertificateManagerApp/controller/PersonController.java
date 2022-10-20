@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/person")
+@RequestMapping("/api/person")
 @RequiredArgsConstructor
 public class PersonController {
     private final PersonService personService;

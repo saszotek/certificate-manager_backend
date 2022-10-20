@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/certificate")
+@RequestMapping("/api/certificate")
 @RequiredArgsConstructor
 public class CertificateController {
     private final CertificateService certificateService;
