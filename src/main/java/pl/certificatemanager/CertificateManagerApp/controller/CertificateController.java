@@ -28,7 +28,7 @@ public class CertificateController {
 
     @PostMapping("/save")
     public ResponseEntity<Certificate> saveCertificate(@RequestBody Certificate certificate) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/certificate/save").toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/certificate/save").toUriString());
         return ResponseEntity.created(uri).body(certificateService.saveCertificate(certificate));
     }
 

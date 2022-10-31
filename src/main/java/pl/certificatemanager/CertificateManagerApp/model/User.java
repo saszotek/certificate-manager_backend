@@ -21,7 +21,11 @@ public class User implements UserDetails {
     private Long id;
     private String username;
     private String password;
-//    private List<Authority> authorities = new ArrayList<>();
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
     @Override
     public String getUsername() {

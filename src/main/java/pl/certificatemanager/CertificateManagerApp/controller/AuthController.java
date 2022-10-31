@@ -10,10 +10,17 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.certificatemanager.CertificateManagerApp.dto.AuthCredentialsRequest;
+import pl.certificatemanager.CertificateManagerApp.model.Authority;
 import pl.certificatemanager.CertificateManagerApp.model.User;
+import pl.certificatemanager.CertificateManagerApp.repository.AuthorityRepo;
+import pl.certificatemanager.CertificateManagerApp.repository.UserRepo;
 import pl.certificatemanager.CertificateManagerApp.util.JwtUtil;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,6 +30,12 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private AuthorityRepo authorityRepo;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthCredentialsRequest request) {
@@ -35,6 +48,22 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody AuthCredentialsRequest request) {
+        if (userRepo.existsByUsername(request.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        User user = new User(request.getUsername(), passwordEncoder.encode(request.getPassword()));
+        userRepo.save(user);
+
+        authorityRepo.save(new Authority("ROLE_USER", user));
+
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/auth/register").toUriString());
+        return ResponseEntity.created(uri).body("User was properly registered!");
     }
 
     @GetMapping("/validate")

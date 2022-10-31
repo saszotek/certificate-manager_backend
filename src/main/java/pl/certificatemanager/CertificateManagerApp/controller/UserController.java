@@ -30,7 +30,7 @@ public class UserController {
     public ResponseEntity<User> saveUser(@RequestBody User user) {
 //      it's better to send status 201 (.created()) when creating something on the server instead of status 200 (.ok())
 //      creating URI pointing current API path
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/save").toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 

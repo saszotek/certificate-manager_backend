@@ -20,7 +20,7 @@ public class AuthorityController {
 
     @PostMapping("/save")
     public ResponseEntity<Authority> saveUser(@RequestBody Authority authority) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/authority/save").toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/authority/save").toUriString());
         return ResponseEntity.created(uri).body(authorityService.saveAuthority(authority));
     }
 }

@@ -28,7 +28,7 @@ public class PersonController {
 
     @PostMapping("/save")
     public ResponseEntity<Person> savePerson(@RequestBody Person person) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/person/save").toUriString());
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/person/save").toUriString());
         return ResponseEntity.created(uri).body(personService.savePerson(person));
     }
 
