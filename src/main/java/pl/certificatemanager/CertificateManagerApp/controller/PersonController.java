@@ -32,7 +32,7 @@ public class PersonController {
         return ResponseEntity.created(uri).body(personService.savePerson(person));
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Person> deletePerson(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(personService.deletePerson(id));
     }

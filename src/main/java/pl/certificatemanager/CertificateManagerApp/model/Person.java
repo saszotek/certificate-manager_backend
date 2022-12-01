@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,10 +31,18 @@ public class Person {
     private String postalCode;
     @Column(name = "certificate_request")
     private boolean certificateRequest = false;
+    @Column(name = "certificate_status")
+    private String certificateStatus;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "certificate_id")
     private Certificate certificate;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
+    @OneToMany(mappedBy = "person")
+    private List<Payment> payments = new ArrayList<>();
+
+    public void addPayment(Payment payment) {
+        payments.add(payment);
+    }
 }

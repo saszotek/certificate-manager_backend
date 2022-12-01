@@ -52,8 +52,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AuthCredentialsRequest request) {
-        if (userRepo.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        if (userRepo.existsByUsername(request.getUsername()) || request.getUsername().isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: Username is empty or already taken!");
         }
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
