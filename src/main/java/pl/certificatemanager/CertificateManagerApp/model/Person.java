@@ -1,5 +1,6 @@
 package pl.certificatemanager.CertificateManagerApp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Person {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String pesel;
     @Column(name = "first_name")
@@ -30,7 +31,7 @@ public class Person {
     @Column(name = "postal_code")
     private String postalCode;
     @Column(name = "certificate_request")
-    private boolean certificateRequest = false;
+    private String certificateRequest = "false";
     @Column(name = "certificate_status")
     private String certificateStatus;
     @OneToOne(cascade = CascadeType.ALL)
@@ -39,10 +40,17 @@ public class Person {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "person")
+    @OneToMany(mappedBy = "person",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Payment> payments = new ArrayList<>();
 
     public void addPayment(Payment payment) {
         payments.add(payment);
+    }
+
+    public void deletePayment(Payment payment) {
+        payments.remove(payment);
     }
 }

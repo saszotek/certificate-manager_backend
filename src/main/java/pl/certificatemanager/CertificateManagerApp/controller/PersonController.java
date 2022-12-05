@@ -1,6 +1,7 @@
 package pl.certificatemanager.CertificateManagerApp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -35,5 +36,29 @@ public class PersonController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Person> deletePerson(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(personService.deletePerson(id));
+    }
+
+    @PostMapping("/save/{personId}/payment/{paymentId}")
+    public ResponseEntity<Person> savePaymentToPerson(@PathVariable("personId") Long personId, @PathVariable("paymentId") Long paymentId) {
+        Person person = personService.savePaymentToPerson(personId, paymentId);
+        return new ResponseEntity<>(person, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{personId}/payment/{paymentId}")
+    public ResponseEntity<Person> deletePaymentFromPerson(@PathVariable("personId") Long personId, @PathVariable("paymentId") Long paymentId) {
+        Person person = personService.deletePaymentFromPerson(personId, paymentId);
+        return new ResponseEntity<>(person, HttpStatus.OK);
+    }
+
+    @PostMapping("/save/{personId}/certificate/{certificateId}")
+    public ResponseEntity<Person> saveCertificateToPerson(@PathVariable("personId") Long personId, @PathVariable("certificateId") Long certificateId) {
+        Person person = personService.saveCertificateToPerson(personId, certificateId);
+        return new ResponseEntity<>(person, HttpStatus.OK);
+    }
+
+    @PostMapping("/save/{personId}/user/{userId}")
+    public ResponseEntity<Person> saveUserToPerson(@PathVariable("personId") Long personId, @PathVariable("userId") Long userId) {
+        Person person = personService.saveUserToPerson(personId, userId);
+        return new ResponseEntity<>(person, HttpStatus.OK);
     }
 }
