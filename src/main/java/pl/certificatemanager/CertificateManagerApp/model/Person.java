@@ -41,8 +41,7 @@ public class Person {
     @JoinColumn(name = "user_id")
     private User user;
     @OneToMany(mappedBy = "person",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            cascade = CascadeType.REMOVE
     )
     private List<Payment> payments = new ArrayList<>();
 
