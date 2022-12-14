@@ -74,7 +74,6 @@ public class AuthController {
                 return ResponseEntity.ok().body(user);
             }
             return ResponseEntity.ok(false);
-//            return ResponseEntity.ok(isTokenValid);
         } catch (ExpiredJwtException e) {
             return ResponseEntity.ok(false);
         }
