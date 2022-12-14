@@ -34,6 +34,12 @@ public class PersonService {
         return personRepo.findPersonById(id);
     }
 
+    public Person getPersonByUser(Long userId) {
+        User user = userService.getUserById(userId);
+        log.info("Fetching person where user id {}", userId);
+        return personRepo.findPersonByUser(user);
+    }
+
     public Person savePerson(Person person) {
         log.info("Saving new person {} to the database", person.getLastName());
         return personRepo.save(person);

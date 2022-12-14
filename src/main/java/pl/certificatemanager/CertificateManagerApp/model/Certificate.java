@@ -29,4 +29,6 @@ public class Certificate {
     @Column(name = "valid_to")
     @Temporal(TemporalType.TIMESTAMP)
     private Date validTo;
+    @Column(name = "certificate_status")
+    private String certificateStatus;
 }

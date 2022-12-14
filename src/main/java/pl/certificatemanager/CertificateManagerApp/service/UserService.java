@@ -42,7 +42,9 @@ public class UserService {
     public User deleteUser(Long id) {
         User user = getUserById(id);
         Person person = personRepo.findPersonByUser(user);
-        personRepo.delete(person);
+        if (person != null) {
+            personRepo.delete(person);
+        }
         log.info("Deleting user {}", user);
         userRepo.delete(user);
         return user;

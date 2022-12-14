@@ -32,8 +32,6 @@ public class Person {
     private String postalCode;
     @Column(name = "certificate_request")
     private String certificateRequest = "false";
-    @Column(name = "certificate_status")
-    private String certificateStatus;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "certificate_id")
     private Certificate certificate;
