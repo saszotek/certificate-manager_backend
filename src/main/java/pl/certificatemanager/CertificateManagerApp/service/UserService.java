@@ -3,9 +3,7 @@ package pl.certificatemanager.CertificateManagerApp.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.certificatemanager.CertificateManagerApp.model.Person;
 import pl.certificatemanager.CertificateManagerApp.model.User;
-import pl.certificatemanager.CertificateManagerApp.repository.PersonRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.UserRepo;
 
 import javax.transaction.Transactional;
@@ -17,7 +15,6 @@ import java.util.List;
 @Slf4j
 public class UserService {
     private final UserRepo userRepo;
-    private final PersonRepo personRepo;
 
     public List<User> getUsers() {
         log.info("Fetching all users");
@@ -41,10 +38,6 @@ public class UserService {
 
     public User deleteUser(Long id) {
         User user = getUserById(id);
-        Person person = personRepo.findPersonByUser(user);
-        if (person != null) {
-            personRepo.delete(person);
-        }
         log.info("Deleting user {}", user);
         userRepo.delete(user);
         return user;
