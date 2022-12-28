@@ -5,4 +5,5 @@ import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 
 public interface CertificateRepo extends JpaRepository<Certificate, Long> {
     Certificate findCertificateById(Long id);
+    Boolean existsBySerialNumber(String serialNumber);
 }

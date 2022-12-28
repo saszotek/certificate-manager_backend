@@ -5,4 +5,5 @@ import pl.certificatemanager.CertificateManagerApp.model.Invoice;
 
 public interface InvoiceRepo extends JpaRepository<Invoice, Long> {
     Invoice findInvoiceById(Long id);
+    Boolean existsByInvoiceNumber(String invoiceNumber);
 }

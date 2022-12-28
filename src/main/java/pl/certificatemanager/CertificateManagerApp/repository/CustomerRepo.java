@@ -5,4 +5,5 @@ import pl.certificatemanager.CertificateManagerApp.model.Customer;
 
 public interface CustomerRepo extends JpaRepository<Customer, Long> {
     Customer findCustomerById(Long id);
+    Boolean existsByEmail(String email);
 }
