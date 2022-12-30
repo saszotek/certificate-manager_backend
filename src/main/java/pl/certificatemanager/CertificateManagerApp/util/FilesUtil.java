@@ -25,7 +25,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -38,6 +41,10 @@ public class FilesUtil {
 
     public void saveFromFileToDatabase(String path) {
         try {
+            ArrayList<Invoice> invoices = new ArrayList<>();
+            ArrayList<Certificate> certificates = new ArrayList<>();
+            HashMap<String, ArrayList<Certificate>> certificatesInvoice = new HashMap<>();
+
             File xmlDoc = new File(path);
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -46,11 +53,15 @@ public class FilesUtil {
             NodeList customerList = doc.getElementsByTagName("customer");
 
             for (int i = 0; i < customerList.getLength(); i++) {
+                invoices.clear();
+                certificates.clear();
+
                 Node customer = customerList.item(i);
                 if (customer.getNodeType() == Node.ELEMENT_NODE) {
                     Element elementCustomer = (Element) customer;
 
                     if (customerRepo.existsByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent())) {
+                        deleteFile(path);
                         throw new CustomerAlreadySavedException(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
                     }
 
@@ -61,8 +72,6 @@ public class FilesUtil {
                     newCustomer.setEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
                     newCustomer.setCity(elementCustomer.getElementsByTagName("city").item(0).getTextContent());
 
-                    customerRepo.save(newCustomer);
-
                     NodeList invoiceList = elementCustomer.getElementsByTagName("invoice");
 
                     for (int j = 0; j < invoiceList.getLength(); j++) {
@@ -71,6 +80,7 @@ public class FilesUtil {
                             Element elementInvoice = (Element) invoice;
 
                             if (invoiceRepo.existsByInvoiceNumber(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent())) {
+                                deleteFile(path);
                                 throw new InvoiceAlreadySavedException(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent());
                             }
 
@@ -82,8 +92,7 @@ public class FilesUtil {
                             newInvoice.setDateOfAgreement(dateInvoice);
                             newInvoice.setStatus(elementInvoice.getElementsByTagName("status").item(0).getTextContent());
 
-                            invoiceRepo.save(newInvoice);
-                            customerService.saveInvoiceToCustomer(newCustomer.getId(), newInvoice.getId());
+                            invoices.add(newInvoice);
 
                             NodeList certificatesList = elementInvoice.getElementsByTagName("certificate");
 
@@ -93,7 +102,7 @@ public class FilesUtil {
                                     Element elementCertificate = (Element) certificate;
 
                                     if (certificateRepo.existsBySerialNumber(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent())) {
-                                        customerRepo.delete(newCustomer);
+                                        deleteFile(path);
                                         throw new CertificateAlreadySavedException(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent());
                                     }
 
@@ -107,12 +116,35 @@ public class FilesUtil {
                                     newCertificate.setCardNumber(elementCertificate.getElementsByTagName("cardNumber").item(0).getTextContent());
                                     newCertificate.setCardType(elementCertificate.getElementsByTagName("cardType").item(0).getTextContent());
 
-                                    certificateRepo.save(newCertificate);
-                                    invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+                                    certificates.add(newCertificate);
+                                }
+                            }
+                            certificatesInvoice.put(newInvoice.getInvoiceNumber(), certificates);
+                        }
+                    }
+                    invoices.forEach(invoice -> {
+                        if (certificatesInvoice.containsKey(invoice.getInvoiceNumber())) {
+                            invoiceRepo.save(invoice);
+                            for (Map.Entry<String, ArrayList<Certificate>> entry : certificatesInvoice.entrySet()) {
+                                if (invoice.getInvoiceNumber() == entry.getKey()) {
+                                    ArrayList<Certificate> values = entry.getValue();
+                                    values.forEach(value -> {
+                                        certificateRepo.save(value);
+                                        invoiceService.saveCertificateToInvoice(invoice.getId(), value.getId());
+                                    });
+                                    values.clear();
                                 }
                             }
                         }
-                    }
+                    });
+
+                    customerRepo.save(newCustomer);
+                    invoices.forEach(invoice -> {
+                        customerService.saveInvoiceToCustomer(newCustomer.getId(), invoice.getId());
+                    });
+                    invoices.clear();
+                    certificates.clear();
+                    certificatesInvoice.clear();
                 }
             }
         } catch (Exception e) {

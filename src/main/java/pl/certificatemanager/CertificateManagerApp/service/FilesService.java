@@ -19,9 +19,10 @@ public class FilesService {
 
     public void saveFile(MultipartFile file) {
         try {
-            Files.copy(file.getInputStream(), Path.of(filePath + file.getOriginalFilename()));
-            filesUtil.saveFromFileToDatabase(filePath + file.getOriginalFilename());
-            filesUtil.deleteFile(filePath + file.getOriginalFilename());
+            String filePathFull = filePath + file.getOriginalFilename();
+            Files.copy(file.getInputStream(), Path.of(filePathFull));
+            filesUtil.saveFromFileToDatabase(filePathFull);
+            filesUtil.deleteFile(filePathFull);
         } catch (Exception e) {
             throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
         }
