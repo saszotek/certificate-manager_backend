@@ -11,6 +11,7 @@ import pl.certificatemanager.CertificateManagerApp.exception.CertificateAlreadyS
 import pl.certificatemanager.CertificateManagerApp.exception.CustomerAlreadySavedException;
 import pl.certificatemanager.CertificateManagerApp.exception.CustomerNotFoundByEmailException;
 import pl.certificatemanager.CertificateManagerApp.exception.InvoiceAlreadySavedException;
+import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.model.Invoice;
@@ -41,6 +42,7 @@ public class FilesUtil {
     private final CertificateRepo certificateRepo;
     private final CustomerService customerService;
     private final InvoiceService invoiceService;
+    private final ResponseMessage responseMessage;
 
     public void saveFromFileToDatabase(String path) {
         try {
@@ -60,8 +62,10 @@ public class FilesUtil {
 
             } else if (extension.equals("eml")) {
                 System.out.println("EML FILE");
+//                TODO
             } else if (extension.equals("csv")) {
                 System.out.println("CSV FILE");
+//                TODO
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
@@ -97,6 +101,7 @@ public class FilesUtil {
                 Element elementCustomer = (Element) customer;
 
                 if (customerRepo.existsByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent())) {
+                    responseMessage.setMessage("Customer with email" + elementCustomer.getElementsByTagName("email").item(0).getTextContent() + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                     deleteFile(path);
                     throw new CustomerAlreadySavedException(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
                 }
@@ -116,6 +121,7 @@ public class FilesUtil {
                         Element elementInvoice = (Element) invoice;
 
                         if (invoiceRepo.existsByInvoiceNumber(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent())) {
+                            responseMessage.setMessage("Invoice with invoice number " + elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent() + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                             deleteFile(path);
                             throw new InvoiceAlreadySavedException(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent());
                         }
@@ -138,6 +144,7 @@ public class FilesUtil {
                                 Element elementCertificate = (Element) certificate;
 
                                 if (certificateRepo.existsBySerialNumber(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent())) {
+                                    responseMessage.setMessage("Certificate with serial number " + elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent() + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                                     deleteFile(path);
                                     throw new CertificateAlreadySavedException(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent());
                                 }
@@ -198,11 +205,13 @@ public class FilesUtil {
                 Element elementInvoice = (Element) invoice;
 
                 if (invoiceRepo.existsByInvoiceNumber(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent())) {
+                    responseMessage.setMessage("Invoice with invoice number " + elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent() + " is already saved in the database! Invoices listed after weren't imported to the database due to the error.");
                     deleteFile(path);
                     throw new InvoiceAlreadySavedException(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent());
                 }
 
                 if (!(customerRepo.existsByEmail(elementInvoice.getElementsByTagName("email").item(0).getTextContent()))) {
+                    responseMessage.setMessage("Customer with email " + elementInvoice.getElementsByTagName("email").item(0).getTextContent() + " wasn't found in the database. Invoices listed after weren't imported to the database due to the error.");
                     deleteFile(path);
                     throw new CustomerNotFoundByEmailException(elementInvoice.getElementsByTagName("email").item(0).getTextContent());
                 }
@@ -223,6 +232,7 @@ public class FilesUtil {
                         Element elementCertificate = (Element) certificate;
 
                         if (certificateRepo.existsBySerialNumber(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent())) {
+                            responseMessage.setMessage("Certificate with serial number " + elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent() + " is already saved in the database! Invoices listed after weren't imported to the database due to the error.");
                             deleteFile(path);
                             throw new CertificateAlreadySavedException(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent());
                         }
