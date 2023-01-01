@@ -2,11 +2,14 @@ package pl.certificatemanager.CertificateManagerApp.util;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.converter.EmailConverter;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import pl.certificatemanager.CertificateManagerApp.exception.CertificateAlreadySavedException;
 import pl.certificatemanager.CertificateManagerApp.exception.CustomerAlreadySavedException;
 import pl.certificatemanager.CertificateManagerApp.exception.CustomerNotFoundByEmailException;
@@ -23,8 +26,7 @@ import pl.certificatemanager.CertificateManagerApp.service.InvoiceService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -61,8 +63,21 @@ public class FilesUtil {
                 }
 
             } else if (extension.equals("eml")) {
-                System.out.println("EML FILE");
-//                TODO
+                InputStream inputStream = new FileInputStream(file);
+                Email email = EmailConverter.emlToEmail(inputStream);
+                String emailContent = email.getPlainText();
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(new InputSource(new StringReader(emailContent)));
+
+                inputStream.close();
+
+                if (doc.getDocumentElement().getNodeName().equals("customers")) {
+                    saveCustomerFromXmlSchema(doc, path);
+                } else if (doc.getDocumentElement().getNodeName().equals("invoices")) {
+                    saveInvoiceFromXmlSchema(doc, path);
+                }
             } else if (extension.equals("csv")) {
                 System.out.println("CSV FILE");
 //                TODO
