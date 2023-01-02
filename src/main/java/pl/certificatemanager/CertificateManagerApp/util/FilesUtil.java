@@ -365,9 +365,27 @@ public class FilesUtil {
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
                     } else {
-                        responseMessage.setMessage("Invoice with invoice number " + row[5] + " and email " + row[3] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
-                        deleteFile(path);
-                        throw new InvoiceAlreadySavedException(row[5]);
+                        if (certificateRepo.existsBySerialNumber(row[8])) {
+                            responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                            deleteFile(path);
+                            throw new CertificateAlreadySavedException(row[8]);
+                        }
+
+                        Invoice invoice = invoiceRepo.findByInvoiceNumber(row[5]);
+
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        Date dateValidFrom = simpleDateFormat.parse(row[9]);
+                        Date dateValidTo = simpleDateFormat.parse(row[10]);
+
+                        Certificate newCertificate = new Certificate();
+                        newCertificate.setSerialNumber(row[8]);
+                        newCertificate.setValidFrom(dateValidFrom);
+                        newCertificate.setValidTo(dateValidTo);
+                        newCertificate.setCardNumber(row[11]);
+                        newCertificate.setCardType(row[12]);
+
+                        certificateRepo.save(newCertificate);
+                        invoiceService.saveCertificateToInvoice(invoice.getId(), newCertificate.getId());
                     }
                 }
             }
