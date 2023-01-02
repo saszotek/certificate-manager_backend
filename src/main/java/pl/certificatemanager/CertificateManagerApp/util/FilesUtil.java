@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.simplejavamail.api.email.AttachmentResource;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.converter.EmailConverter;
 import org.springframework.stereotype.Component;
@@ -45,11 +46,47 @@ public class FilesUtil {
     private final InvoiceService invoiceService;
     private final ResponseMessage responseMessage;
 
+    private final String directoryPath = "C:\\Users\\danie\\IdeaProjects\\CertificateManagerApp\\src\\main\\java\\pl\\certificatemanager\\CertificateManagerApp\\files\\";
+
     public void saveFromFileToDatabase(String path) {
         try {
             String extension = FilenameUtils.getExtension(path);
             File file = new File(path);
 
+            if (extension.equals("eml")) {
+                InputStream inputStream = new FileInputStream(file);
+                Email email = EmailConverter.emlToEmail(inputStream);
+                List<AttachmentResource> attachments = email.getAttachments();
+                inputStream.close();
+
+                if (!(attachments.isEmpty())) {
+                    attachments.forEach(attachment -> {
+                        String filePathAttachment = directoryPath + attachment.getName();
+
+                        try {
+                            Files.copy(attachment.getDataSourceInputStream(), Path.of(filePathAttachment));
+                            String extensionAttachment = FilenameUtils.getExtension(filePathAttachment);
+                            File fileAttachment = new File(filePathAttachment);
+
+                            parseFileBasedOnExtension(extensionAttachment, filePathAttachment, fileAttachment);
+                            deleteFile(filePathAttachment);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Could not store attachment from .eml file! Error: " + e.getMessage());
+                        }
+                    });
+                } else {
+                    parseFileBasedOnExtension(extension, path, file);
+                }
+            } else {
+                parseFileBasedOnExtension(extension, path, file);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
+        }
+    }
+
+    private void parseFileBasedOnExtension(String extension, String path, File file) {
+        try {
             if (extension.equals("txt")) {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
@@ -81,7 +118,7 @@ public class FilesUtil {
                 saveCustomerFromCsv(file, path);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
+            throw new RuntimeException("Something went wrong! Could not save data to the database. Error: " + e.getMessage());
         }
     }
 

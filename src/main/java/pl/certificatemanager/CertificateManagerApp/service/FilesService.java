@@ -15,11 +15,11 @@ import java.nio.file.Path;
 public class FilesService {
     private final FilesUtil filesUtil;
 
-    private final String filePath = "C:\\Users\\danie\\IdeaProjects\\CertificateManagerApp\\src\\main\\java\\pl\\certificatemanager\\CertificateManagerApp\\files\\";
+    private final String directoryPath = "C:\\Users\\danie\\IdeaProjects\\CertificateManagerApp\\src\\main\\java\\pl\\certificatemanager\\CertificateManagerApp\\files\\";
 
     public void saveFile(MultipartFile file) {
         try {
-            String filePathFull = filePath + file.getOriginalFilename();
+            String filePathFull = directoryPath + file.getOriginalFilename();
             Files.copy(file.getInputStream(), Path.of(filePathFull));
             filesUtil.saveFromFileToDatabase(filePathFull);
             filesUtil.deleteFile(filePathFull);
