@@ -1,5 +1,7 @@
 package pl.certificatemanager.CertificateManagerApp.util;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.simplejavamail.api.email.Email;
@@ -31,10 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -79,8 +78,7 @@ public class FilesUtil {
                     saveInvoiceFromXmlSchema(doc, path);
                 }
             } else if (extension.equals("csv")) {
-                System.out.println("CSV FILE");
-//                TODO
+                saveCustomerFromCsv(file, path);
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
@@ -275,6 +273,102 @@ public class FilesUtil {
 
                 certificates.clear();
             }
+        }
+    }
+
+    private void saveCustomerFromCsv(File file, String path) {
+        try {
+            FileReader fileReader = new FileReader(file);
+            CSVReader csvReader = new CSVReaderBuilder(fileReader).withSkipLines(1).build();
+            List<String[]> allData = csvReader.readAll();
+            fileReader.close();
+
+            for (String[] row : allData) {
+                if (!(customerRepo.existsByEmail(row[3]))) {
+                    if (invoiceRepo.existsByInvoiceNumber(row[5])) {
+                        responseMessage.setMessage("Invoice with invoice number " + row[5] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                        deleteFile(path);
+                        throw new InvoiceAlreadySavedException(row[5]);
+
+                    }
+
+                    if (certificateRepo.existsBySerialNumber(row[8])) {
+                        responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                        deleteFile(path);
+                        throw new CertificateAlreadySavedException(row[8]);
+                    }
+
+                    Customer newCustomer = new Customer();
+                    newCustomer.setFirstName(row[0]);
+                    newCustomer.setLastName(row[1]);
+                    newCustomer.setPhoneNumber(row[2]);
+                    newCustomer.setEmail(row[3]);
+                    newCustomer.setCity(row[4]);
+
+                    customerRepo.save(newCustomer);
+
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date dateInvoice = simpleDateFormat.parse(row[6]);
+
+
+                    Invoice newInvoice = new Invoice();
+                    newInvoice.setInvoiceNumber(row[5]);
+                    newInvoice.setDateOfAgreement(dateInvoice);
+                    newInvoice.setStatus(row[7]);
+
+                    invoiceRepo.save(newInvoice);
+                    customerService.saveInvoiceToCustomer(newCustomer.getId(), newInvoice.getId());
+
+                    Date dateValidFrom = simpleDateFormat.parse(row[9]);
+                    Date dateValidTo = simpleDateFormat.parse(row[10]);
+
+                    Certificate newCertificate = new Certificate();
+                    newCertificate.setSerialNumber(row[8]);
+                    newCertificate.setValidFrom(dateValidFrom);
+                    newCertificate.setValidTo(dateValidTo);
+                    newCertificate.setCardNumber(row[11]);
+                    newCertificate.setCardType(row[12]);
+
+                    certificateRepo.save(newCertificate);
+                    invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+                } else {
+                    if (!(invoiceRepo.existsByInvoiceNumber(row[5]))) {
+                        if (certificateRepo.existsBySerialNumber(row[8])) {
+                            responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                            deleteFile(path);
+                            throw new CertificateAlreadySavedException(row[8]);
+                        }
+
+                        Customer customer = customerRepo.findByEmail(row[3]);
+
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        Date dateInvoice = simpleDateFormat.parse(row[6]);
+
+                        Invoice newInvoice = new Invoice();
+                        newInvoice.setInvoiceNumber(row[5]);
+                        newInvoice.setDateOfAgreement(dateInvoice);
+                        newInvoice.setStatus(row[7]);
+
+                        invoiceRepo.save(newInvoice);
+                        customerService.saveInvoiceToCustomer(customer.getId(), newInvoice.getId());
+
+                        Date dateValidFrom = simpleDateFormat.parse(row[9]);
+                        Date dateValidTo = simpleDateFormat.parse(row[10]);
+
+                        Certificate newCertificate = new Certificate();
+                        newCertificate.setSerialNumber(row[8]);
+                        newCertificate.setValidFrom(dateValidFrom);
+                        newCertificate.setValidTo(dateValidTo);
+                        newCertificate.setCardNumber(row[11]);
+                        newCertificate.setCardType(row[12]);
+
+                        certificateRepo.save(newCertificate);
+                        invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+                    }
+                }
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
         }
     }
 }
