@@ -364,6 +364,10 @@ public class FilesUtil {
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+                    } else {
+                        responseMessage.setMessage("Invoice with invoice number " + row[5] + " and email " + row[3] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                        deleteFile(path);
+                        throw new InvoiceAlreadySavedException(row[5]);
                     }
                 }
             }
