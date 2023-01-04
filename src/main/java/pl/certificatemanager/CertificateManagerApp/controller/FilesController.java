@@ -32,7 +32,7 @@ public class FilesController {
                 fileNames.add(file.getOriginalFilename());
             });
 
-            return ResponseEntity.status(HttpStatus.OK).body("Uploaded the files successfully: " + fileNames + ". " + responseMessage.getMessage());
+            return ResponseEntity.status(HttpStatus.OK).body("Uploaded the files successfully: " + fileNames);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Failed to upload files. " + responseMessage.getMessage());
         }

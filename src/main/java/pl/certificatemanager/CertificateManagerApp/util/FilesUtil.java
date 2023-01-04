@@ -13,10 +13,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import pl.certificatemanager.CertificateManagerApp.exception.CertificateAlreadySavedException;
-import pl.certificatemanager.CertificateManagerApp.exception.CustomerAlreadySavedException;
-import pl.certificatemanager.CertificateManagerApp.exception.CustomerNotFoundByEmailException;
-import pl.certificatemanager.CertificateManagerApp.exception.InvoiceAlreadySavedException;
+import pl.certificatemanager.CertificateManagerApp.exception.*;
 import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
@@ -147,12 +144,23 @@ public class FilesUtil {
                         customerService.saveInvoiceToCustomer(oldCustomer.getId(), invoice.getId());
                     });
                 } else {
+                    String firstName = elementCustomer.getElementsByTagName("firstName").item(0).getTextContent();
+                    String lastName = elementCustomer.getElementsByTagName("lastName").item(0).getTextContent();
+                    String phoneNumber = elementCustomer.getElementsByTagName("phoneNumber").item(0).getTextContent();
+                    String email = elementCustomer.getElementsByTagName("email").item(0).getTextContent();
+                    String city = elementCustomer.getElementsByTagName("city").item(0).getTextContent();
+
+                    if (!(validateCustomer(firstName, lastName, phoneNumber, email, city))) {
+                        deleteFile(path);
+                        throw new CustomerNotValidatedException(email);
+                    }
+
                     Customer newCustomer = new Customer();
-                    newCustomer.setFirstName(elementCustomer.getElementsByTagName("firstName").item(0).getTextContent());
-                    newCustomer.setLastName(elementCustomer.getElementsByTagName("lastName").item(0).getTextContent());
-                    newCustomer.setPhoneNumber(elementCustomer.getElementsByTagName("phoneNumber").item(0).getTextContent());
-                    newCustomer.setEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
-                    newCustomer.setCity(elementCustomer.getElementsByTagName("city").item(0).getTextContent());
+                    newCustomer.setFirstName(firstName);
+                    newCustomer.setLastName(lastName);
+                    newCustomer.setPhoneNumber(phoneNumber);
+                    newCustomer.setEmail(email);
+                    newCustomer.setCity(city);
 
                     parseInvoicesAndItsCertificates(path, elementCustomer, invoices, certificates, certificatesInvoice);
 
@@ -183,13 +191,22 @@ public class FilesUtil {
                     throw new InvoiceAlreadySavedException(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent());
                 }
 
+                String invoiceNumber = elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent();
+                String dateOfAgreement = elementInvoice.getElementsByTagName("dateOfAgreement").item(0).getTextContent();
+                String status = elementInvoice.getElementsByTagName("status").item(0).getTextContent();
+
+                if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                    deleteFile(path);
+                    throw new InvoiceNotValidatedException(invoiceNumber);
+                }
+
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date dateInvoice = simpleDateFormat.parse(elementInvoice.getElementsByTagName("dateOfAgreement").item(0).getTextContent());
+                Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
                 Invoice newInvoice = new Invoice();
-                newInvoice.setInvoiceNumber(elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent());
+                newInvoice.setInvoiceNumber(invoiceNumber);
                 newInvoice.setDateOfAgreement(dateInvoice);
-                newInvoice.setStatus(elementInvoice.getElementsByTagName("status").item(0).getTextContent());
+                newInvoice.setStatus(status);
 
                 invoices.add(newInvoice);
 
@@ -207,15 +224,26 @@ public class FilesUtil {
                             throw new CertificateAlreadySavedException(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent());
                         }
 
-                        Date dateValidFrom = simpleDateFormat.parse(elementCertificate.getElementsByTagName("validFrom").item(0).getTextContent());
-                        Date dateValidTo = simpleDateFormat.parse(elementCertificate.getElementsByTagName("validTo").item(0).getTextContent());
+                        String serialNumber = elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent();
+                        String validFrom = elementCertificate.getElementsByTagName("validFrom").item(0).getTextContent();
+                        String validTo = elementCertificate.getElementsByTagName("validTo").item(0).getTextContent();
+                        String cardNumber = elementCertificate.getElementsByTagName("cardNumber").item(0).getTextContent();
+                        String cardType = elementCertificate.getElementsByTagName("cardType").item(0).getTextContent();
+
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                            deleteFile(path);
+                            throw new CertificateNotValidatedException(serialNumber);
+                        }
+
+                        Date dateValidFrom = simpleDateFormat.parse(validFrom);
+                        Date dateValidTo = simpleDateFormat.parse(validTo);
 
                         Certificate newCertificate = new Certificate();
-                        newCertificate.setSerialNumber(elementCertificate.getElementsByTagName("serialNumber").item(0).getTextContent());
+                        newCertificate.setSerialNumber(serialNumber);
                         newCertificate.setValidFrom(dateValidFrom);
                         newCertificate.setValidTo(dateValidTo);
-                        newCertificate.setCardNumber(elementCertificate.getElementsByTagName("cardNumber").item(0).getTextContent());
-                        newCertificate.setCardType(elementCertificate.getElementsByTagName("cardType").item(0).getTextContent());
+                        newCertificate.setCardNumber(cardNumber);
+                        newCertificate.setCardType(cardType);
 
                         certificates.add(newCertificate);
                     }
@@ -261,37 +289,67 @@ public class FilesUtil {
                         deleteFile(path);
                         throw new CertificateAlreadySavedException(row[8]);
                     }
+                    String firstName = row[0];
+                    String lastName = row[1];
+                    String phoneNumber = row[2];
+                    String email = row[3];
+                    String city = row[4];
+
+                    if (!(validateCustomer(firstName, lastName, phoneNumber, email, city))) {
+                        deleteFile(path);
+                        throw new CustomerNotValidatedException(email);
+                    }
+
+                    String invoiceNumber = row[5];
+                    String dateOfAgreement = row[6];
+                    String status = row[7];
+
+                    if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                        deleteFile(path);
+                        throw new InvoiceNotValidatedException(invoiceNumber);
+                    }
+
+                    String serialNumber = row[8];
+                    String validFrom = row[9];
+                    String validTo = row[10];
+                    String cardNumber = row[11];
+                    String cardType = row[12];
+
+                    if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                        deleteFile(path);
+                        throw new CertificateNotValidatedException(serialNumber);
+                    }
 
                     Customer newCustomer = new Customer();
-                    newCustomer.setFirstName(row[0]);
-                    newCustomer.setLastName(row[1]);
-                    newCustomer.setPhoneNumber(row[2]);
-                    newCustomer.setEmail(row[3]);
-                    newCustomer.setCity(row[4]);
+                    newCustomer.setFirstName(firstName);
+                    newCustomer.setLastName(lastName);
+                    newCustomer.setPhoneNumber(phoneNumber);
+                    newCustomer.setEmail(email);
+                    newCustomer.setCity(city);
 
                     customerRepo.save(newCustomer);
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date dateInvoice = simpleDateFormat.parse(row[6]);
+                    Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
 
                     Invoice newInvoice = new Invoice();
-                    newInvoice.setInvoiceNumber(row[5]);
+                    newInvoice.setInvoiceNumber(invoiceNumber);
                     newInvoice.setDateOfAgreement(dateInvoice);
-                    newInvoice.setStatus(row[7]);
+                    newInvoice.setStatus(status);
 
                     invoiceRepo.save(newInvoice);
                     customerService.saveInvoiceToCustomer(newCustomer.getId(), newInvoice.getId());
 
-                    Date dateValidFrom = simpleDateFormat.parse(row[9]);
-                    Date dateValidTo = simpleDateFormat.parse(row[10]);
+                    Date dateValidFrom = simpleDateFormat.parse(validFrom);
+                    Date dateValidTo = simpleDateFormat.parse(validTo);
 
                     Certificate newCertificate = new Certificate();
-                    newCertificate.setSerialNumber(row[8]);
+                    newCertificate.setSerialNumber(serialNumber);
                     newCertificate.setValidFrom(dateValidFrom);
                     newCertificate.setValidTo(dateValidTo);
-                    newCertificate.setCardNumber(row[11]);
-                    newCertificate.setCardType(row[12]);
+                    newCertificate.setCardNumber(cardNumber);
+                    newCertificate.setCardType(cardType);
 
                     certificateRepo.save(newCertificate);
                     invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
@@ -303,28 +361,48 @@ public class FilesUtil {
                             throw new CertificateAlreadySavedException(row[8]);
                         }
 
+                        String invoiceNumber = row[5];
+                        String dateOfAgreement = row[6];
+                        String status = row[7];
+
+                        if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                            deleteFile(path);
+                            throw new InvoiceNotValidatedException(invoiceNumber);
+                        }
+
+                        String serialNumber = row[8];
+                        String validFrom = row[9];
+                        String validTo = row[10];
+                        String cardNumber = row[11];
+                        String cardType = row[12];
+
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                            deleteFile(path);
+                            throw new CertificateNotValidatedException(serialNumber);
+                        }
+
                         Customer customer = customerRepo.findByEmail(row[3]);
 
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        Date dateInvoice = simpleDateFormat.parse(row[6]);
+                        Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
                         Invoice newInvoice = new Invoice();
-                        newInvoice.setInvoiceNumber(row[5]);
+                        newInvoice.setInvoiceNumber(invoiceNumber);
                         newInvoice.setDateOfAgreement(dateInvoice);
-                        newInvoice.setStatus(row[7]);
+                        newInvoice.setStatus(status);
 
                         invoiceRepo.save(newInvoice);
                         customerService.saveInvoiceToCustomer(customer.getId(), newInvoice.getId());
 
-                        Date dateValidFrom = simpleDateFormat.parse(row[9]);
-                        Date dateValidTo = simpleDateFormat.parse(row[10]);
+                        Date dateValidFrom = simpleDateFormat.parse(validFrom);
+                        Date dateValidTo = simpleDateFormat.parse(validTo);
 
                         Certificate newCertificate = new Certificate();
-                        newCertificate.setSerialNumber(row[8]);
+                        newCertificate.setSerialNumber(serialNumber);
                         newCertificate.setValidFrom(dateValidFrom);
                         newCertificate.setValidTo(dateValidTo);
-                        newCertificate.setCardNumber(row[11]);
-                        newCertificate.setCardType(row[12]);
+                        newCertificate.setCardNumber(cardNumber);
+                        newCertificate.setCardType(cardType);
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
@@ -335,18 +413,29 @@ public class FilesUtil {
                             throw new CertificateAlreadySavedException(row[8]);
                         }
 
+                        String serialNumber = row[8];
+                        String validFrom = row[9];
+                        String validTo = row[10];
+                        String cardNumber = row[11];
+                        String cardType = row[12];
+
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                            deleteFile(path);
+                            throw new CertificateNotValidatedException(serialNumber);
+                        }
+
                         Invoice invoice = invoiceRepo.findByInvoiceNumber(row[5]);
 
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        Date dateValidFrom = simpleDateFormat.parse(row[9]);
-                        Date dateValidTo = simpleDateFormat.parse(row[10]);
+                        Date dateValidFrom = simpleDateFormat.parse(validFrom);
+                        Date dateValidTo = simpleDateFormat.parse(validTo);
 
                         Certificate newCertificate = new Certificate();
-                        newCertificate.setSerialNumber(row[8]);
+                        newCertificate.setSerialNumber(serialNumber);
                         newCertificate.setValidFrom(dateValidFrom);
                         newCertificate.setValidTo(dateValidTo);
-                        newCertificate.setCardNumber(row[11]);
-                        newCertificate.setCardType(row[12]);
+                        newCertificate.setCardNumber(cardNumber);
+                        newCertificate.setCardType(cardType);
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(invoice.getId(), newCertificate.getId());
@@ -356,5 +445,95 @@ public class FilesUtil {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    private Boolean validateCustomer(String firstName, String lastName, String phoneNumber, String email, String city) {
+        String phoneRegex = "(?<!\\d)\\d{9}(?!\\d)";
+        String emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+
+        if (firstName.isEmpty()) {
+            responseMessage.setMessage("Customer with email " + email + " could not be added, because of incorrect data in first name field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (lastName.isEmpty()) {
+            responseMessage.setMessage("Customer with email " + email + " could not be added, because of incorrect data in last name field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (city.isEmpty()) {
+            responseMessage.setMessage("Customer with email " + email + " could not be added, because of incorrect data in city field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (!(phoneNumber.matches(phoneRegex))) {
+            responseMessage.setMessage("Customer with email " + email + " could not be added, because of incorrect data in phone number field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (!(email.matches(emailRegex))) {
+            responseMessage.setMessage("Customer with email " + email + " could not be added, because of incorrect data in email field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private Boolean validateInvoice(String invoiceNumber, String dateOfAgreement, String status, String path) {
+        String invoiceRegex = "[0-9]+";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat.setLenient(true);
+
+        if (!(invoiceNumber.matches(invoiceRegex)) || invoiceNumber.isEmpty()) {
+            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in invoice number field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (!(status.equals("Invoice sent")) && !(status.equals("Expired")) && !(status.equals("Resigned")) && !(status.equals("Completed")) && !(status.equals("At the competition")) && !(status.equals("Paid"))) {
+            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in status field! Use one of these: Invoice sent, Expired, Resigned, Completed, At the competition or Paid. Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        try {
+            simpleDateFormat.parse(dateOfAgreement);
+        } catch (ParseException e) {
+            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in date of agreement field! Customers listed after weren't imported to the database due to the error.");
+            deleteFile(path);
+            throw new InvoiceNotValidatedException(invoiceNumber);
+        }
+
+        return true;
+    }
+
+    private Boolean validateCertificate(String serialNumber, String validFrom, String validTo, String cardNumber, String cardType, String path) {
+        String cardRegex = "[0-9]+";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat.setLenient(true);
+
+        if (serialNumber.isEmpty()) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in serial number field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (!(cardNumber.matches(cardRegex)) || cardNumber.isEmpty()) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in card number field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (cardType.isEmpty()) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in card type field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        try {
+            simpleDateFormat.parse(validFrom);
+            simpleDateFormat.parse(validTo);
+        } catch (ParseException e) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in valid from or valid to fields! Customers listed after weren't imported to the database due to the error.");
+            deleteFile(path);
+            throw new CertificateNotValidatedException(serialNumber);
+        }
+
+        return true;
     }
 }
