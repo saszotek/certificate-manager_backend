@@ -86,11 +86,12 @@ public class FilesUtil {
                         }
                     });
                 } else {
-                    parseFileBasedOnExtension(extension, path, file);
+                    responseMessage.setMessage("Wrong file type! Use only .txt, .csv, .eml with correctly formatted data.");
+                    deleteFile(path);
+                    throw new RuntimeException(responseMessage.getMessage());
                 }
             } else {
-                responseMessage.setMessage("Wrong file type! Use only .txt, .csv, .eml with correctly formatted data.");
-                throw new RuntimeException(responseMessage.getMessage());
+                parseFileBasedOnExtension(extension, path, file);
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
