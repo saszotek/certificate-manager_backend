@@ -89,7 +89,8 @@ public class FilesUtil {
                     parseFileBasedOnExtension(extension, path, file);
                 }
             } else {
-                parseFileBasedOnExtension(extension, path, file);
+                responseMessage.setMessage("Wrong file type! Use only .txt, .csv, .eml with correctly formatted data.");
+                throw new RuntimeException(responseMessage.getMessage());
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
