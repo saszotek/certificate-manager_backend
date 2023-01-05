@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.simplejavamail.api.email.AttachmentResource;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.converter.EmailConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,6 +27,10 @@ import pl.certificatemanager.CertificateManagerApp.service.InvoiceService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,7 +48,8 @@ public class FilesUtil {
     private final InvoiceService invoiceService;
     private final ResponseMessage responseMessage;
 
-    private final String directoryPath = "C:\\Users\\danie\\IdeaProjects\\CertificateManagerApp\\src\\main\\java\\pl\\certificatemanager\\CertificateManagerApp\\files\\";
+    @Value("${filesManagement.path}")
+    private String directoryPath;
 
     public void saveFromFileToDatabase(String path) {
         try {
@@ -80,6 +86,13 @@ public class FilesUtil {
         } catch (Exception e) {
             throw new RuntimeException("Could not save data to the database. Error: " + e.getMessage());
         }
+    }
+
+    public File saveFromDatabaseToFile(String typeOfExport) {
+        if (typeOfExport.equals("customers")) {
+            return saveCustomersToXml();
+        }
+        throw new RuntimeException("Could not determine what export to make!");
     }
 
     public void deleteFile(String path) {
@@ -535,5 +548,108 @@ public class FilesUtil {
         }
 
         return true;
+    }
+
+    private File saveCustomersToXml() {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.newDocument();
+
+            Element rootElement = doc.createElement("customers");
+            doc.appendChild(rootElement);
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            List<Customer> customers = customerRepo.findAll();
+
+            customers.forEach(customer -> {
+                Element customerElement = doc.createElement("customer");
+                rootElement.appendChild(customerElement);
+
+                Element firstName = doc.createElement("firstName");
+                firstName.appendChild(doc.createTextNode(customer.getFirstName()));
+                customerElement.appendChild(firstName);
+
+                Element lastName = doc.createElement("lastName");
+                lastName.appendChild(doc.createTextNode(customer.getLastName()));
+                customerElement.appendChild(lastName);
+
+                Element phoneNumber = doc.createElement("phoneNumber");
+                phoneNumber.appendChild(doc.createTextNode(customer.getPhoneNumber()));
+                customerElement.appendChild(phoneNumber);
+
+                Element email = doc.createElement("email");
+                email.appendChild(doc.createTextNode(customer.getEmail()));
+                customerElement.appendChild(email);
+
+                Element city = doc.createElement("city");
+                city.appendChild(doc.createTextNode(customer.getCity()));
+                customerElement.appendChild(city);
+
+                Element invoicesList = doc.createElement("invoices");
+                customerElement.appendChild(invoicesList);
+
+                List<Invoice> invoices = invoiceRepo.findInvoicesByCustomer(customer);
+
+                invoices.forEach(invoice -> {
+                    Element invoiceList = doc.createElement("invoice");
+                    invoicesList.appendChild(invoiceList);
+
+                    Element invoiceNumber = doc.createElement("invoiceNumber");
+                    invoiceNumber.appendChild(doc.createTextNode(invoice.getInvoiceNumber()));
+                    invoiceList.appendChild(invoiceNumber);
+
+                    Element dateOfAgreement = doc.createElement("dateOfAgreement");
+                    dateOfAgreement.appendChild(doc.createTextNode(simpleDateFormat.format(invoice.getDateOfAgreement())));
+                    invoiceList.appendChild(dateOfAgreement);
+
+                    Element status = doc.createElement("status");
+                    status.appendChild(doc.createTextNode(invoice.getStatus()));
+                    invoiceList.appendChild(status);
+
+                    Element certificatesElement = doc.createElement("certificates");
+                    invoiceList.appendChild(certificatesElement);
+
+                    List<Certificate> certificates = certificateRepo.findCertificatesByInvoice(invoice);
+
+                    certificates.forEach(certificate -> {
+                        Element certificateElement = doc.createElement("certificate");
+                        certificatesElement.appendChild(certificateElement);
+
+                        Element serialNumber = doc.createElement("serialNumber");
+                        serialNumber.appendChild(doc.createTextNode(certificate.getSerialNumber()));
+                        certificateElement.appendChild(serialNumber);
+
+                        Element validFrom = doc.createElement("validFrom");
+                        validFrom.appendChild(doc.createTextNode(simpleDateFormat.format(certificate.getValidFrom())));
+                        certificateElement.appendChild(validFrom);
+
+                        Element validTo = doc.createElement("validTo");
+                        validTo.appendChild(doc.createTextNode(simpleDateFormat.format(certificate.getValidTo())));
+                        certificateElement.appendChild(validTo);
+
+                        Element cardNumber = doc.createElement("cardNumber");
+                        cardNumber.appendChild(doc.createTextNode(certificate.getCardNumber()));
+                        certificateElement.appendChild(cardNumber);
+
+                        Element cardType = doc.createElement("cardType");
+                        cardType.appendChild(doc.createTextNode(certificate.getCardType()));
+                        certificateElement.appendChild(cardType);
+                    });
+                });
+            });
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(directoryPath + "exported_customers.txt"));
+            transformer.transform(source, result);
+
+            File file = new File(directoryPath + "exported_customers.txt");
+
+            return file;
+        } catch (Exception e) {
+            throw new RuntimeException("Could not create xml file with customers! Error: " + e.getMessage());
+        }
     }
 }

@@ -1,11 +1,13 @@
 package pl.certificatemanager.CertificateManagerApp.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.certificatemanager.CertificateManagerApp.util.FilesUtil;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,7 +17,8 @@ import java.nio.file.Path;
 public class FilesService {
     private final FilesUtil filesUtil;
 
-    private final String directoryPath = "C:\\Users\\danie\\IdeaProjects\\CertificateManagerApp\\src\\main\\java\\pl\\certificatemanager\\CertificateManagerApp\\files\\";
+    @Value("${filesManagement.path}")
+    private String directoryPath;
 
     public void saveFile(MultipartFile file) {
         try {
@@ -26,5 +29,9 @@ public class FilesService {
         } catch (Exception e) {
             throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
         }
+    }
+
+    public File downloadFile(String typeOfExport) {
+        return filesUtil.saveFromDatabaseToFile(typeOfExport);
     }
 }
