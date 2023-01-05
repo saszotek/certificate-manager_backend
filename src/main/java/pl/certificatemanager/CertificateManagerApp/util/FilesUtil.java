@@ -213,9 +213,8 @@ public class FilesUtil {
 
                 String invoiceNumber = elementInvoice.getElementsByTagName("invoiceNumber").item(0).getTextContent();
                 String dateOfAgreement = elementInvoice.getElementsByTagName("dateOfAgreement").item(0).getTextContent();
-                String status = elementInvoice.getElementsByTagName("status").item(0).getTextContent();
 
-                if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                if (!(validateInvoice(invoiceNumber, dateOfAgreement, path))) {
                     deleteFile(path);
                     throw new InvoiceNotValidatedException(invoiceNumber);
                 }
@@ -226,7 +225,6 @@ public class FilesUtil {
                 Invoice newInvoice = new Invoice();
                 newInvoice.setInvoiceNumber(invoiceNumber);
                 newInvoice.setDateOfAgreement(dateInvoice);
-                newInvoice.setStatus(status);
 
                 invoices.add(newInvoice);
 
@@ -249,8 +247,9 @@ public class FilesUtil {
                         String validTo = elementCertificate.getElementsByTagName("validTo").item(0).getTextContent();
                         String cardNumber = elementCertificate.getElementsByTagName("cardNumber").item(0).getTextContent();
                         String cardType = elementCertificate.getElementsByTagName("cardType").item(0).getTextContent();
+                        String status = elementCertificate.getElementsByTagName("status").item(0).getTextContent();
 
-                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, status, path))) {
                             deleteFile(path);
                             throw new CertificateNotValidatedException(serialNumber);
                         }
@@ -264,6 +263,7 @@ public class FilesUtil {
                         newCertificate.setValidTo(dateValidTo);
                         newCertificate.setCardNumber(cardNumber);
                         newCertificate.setCardType(cardType);
+                        newCertificate.setStatus(status);
 
                         certificates.add(newCertificate);
                     }
@@ -304,10 +304,10 @@ public class FilesUtil {
 
                     }
 
-                    if (certificateRepo.existsBySerialNumber(row[8])) {
-                        responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                    if (certificateRepo.existsBySerialNumber(row[7])) {
+                        responseMessage.setMessage("Certificate with serial number " + row[7] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                         deleteFile(path);
-                        throw new CertificateAlreadySavedException(row[8]);
+                        throw new CertificateAlreadySavedException(row[7]);
                     }
                     String firstName = row[0];
                     String lastName = row[1];
@@ -322,20 +322,20 @@ public class FilesUtil {
 
                     String invoiceNumber = row[5];
                     String dateOfAgreement = row[6];
-                    String status = row[7];
 
-                    if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                    if (!(validateInvoice(invoiceNumber, dateOfAgreement, path))) {
                         deleteFile(path);
                         throw new InvoiceNotValidatedException(invoiceNumber);
                     }
 
-                    String serialNumber = row[8];
-                    String validFrom = row[9];
-                    String validTo = row[10];
-                    String cardNumber = row[11];
-                    String cardType = row[12];
+                    String serialNumber = row[7];
+                    String validFrom = row[8];
+                    String validTo = row[9];
+                    String cardNumber = row[10];
+                    String cardType = row[11];
+                    String status = row[12];
 
-                    if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                    if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, status, path))) {
                         deleteFile(path);
                         throw new CertificateNotValidatedException(serialNumber);
                     }
@@ -356,7 +356,6 @@ public class FilesUtil {
                     Invoice newInvoice = new Invoice();
                     newInvoice.setInvoiceNumber(invoiceNumber);
                     newInvoice.setDateOfAgreement(dateInvoice);
-                    newInvoice.setStatus(status);
 
                     invoiceRepo.save(newInvoice);
                     customerService.saveInvoiceToCustomer(newCustomer.getId(), newInvoice.getId());
@@ -370,33 +369,34 @@ public class FilesUtil {
                     newCertificate.setValidTo(dateValidTo);
                     newCertificate.setCardNumber(cardNumber);
                     newCertificate.setCardType(cardType);
+                    newCertificate.setStatus(status);
 
                     certificateRepo.save(newCertificate);
                     invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
                 } else {
                     if (!(invoiceRepo.existsByInvoiceNumber(row[5]))) {
-                        if (certificateRepo.existsBySerialNumber(row[8])) {
-                            responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                        if (certificateRepo.existsBySerialNumber(row[7])) {
+                            responseMessage.setMessage("Certificate with serial number " + row[7] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                             deleteFile(path);
-                            throw new CertificateAlreadySavedException(row[8]);
+                            throw new CertificateAlreadySavedException(row[7]);
                         }
 
                         String invoiceNumber = row[5];
                         String dateOfAgreement = row[6];
-                        String status = row[7];
 
-                        if (!(validateInvoice(invoiceNumber, dateOfAgreement, status, path))) {
+                        if (!(validateInvoice(invoiceNumber, dateOfAgreement, path))) {
                             deleteFile(path);
                             throw new InvoiceNotValidatedException(invoiceNumber);
                         }
 
-                        String serialNumber = row[8];
-                        String validFrom = row[9];
-                        String validTo = row[10];
-                        String cardNumber = row[11];
-                        String cardType = row[12];
+                        String serialNumber = row[7];
+                        String validFrom = row[8];
+                        String validTo = row[9];
+                        String cardNumber = row[10];
+                        String cardType = row[11];
+                        String status = row[12];
 
-                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, status, path))) {
                             deleteFile(path);
                             throw new CertificateNotValidatedException(serialNumber);
                         }
@@ -409,7 +409,6 @@ public class FilesUtil {
                         Invoice newInvoice = new Invoice();
                         newInvoice.setInvoiceNumber(invoiceNumber);
                         newInvoice.setDateOfAgreement(dateInvoice);
-                        newInvoice.setStatus(status);
 
                         invoiceRepo.save(newInvoice);
                         customerService.saveInvoiceToCustomer(customer.getId(), newInvoice.getId());
@@ -423,23 +422,25 @@ public class FilesUtil {
                         newCertificate.setValidTo(dateValidTo);
                         newCertificate.setCardNumber(cardNumber);
                         newCertificate.setCardType(cardType);
+                        newCertificate.setStatus(status);
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
                     } else {
-                        if (certificateRepo.existsBySerialNumber(row[8])) {
-                            responseMessage.setMessage("Certificate with serial number " + row[8] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
+                        if (certificateRepo.existsBySerialNumber(row[7])) {
+                            responseMessage.setMessage("Certificate with serial number " + row[7] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
                             deleteFile(path);
-                            throw new CertificateAlreadySavedException(row[8]);
+                            throw new CertificateAlreadySavedException(row[7]);
                         }
 
-                        String serialNumber = row[8];
-                        String validFrom = row[9];
-                        String validTo = row[10];
-                        String cardNumber = row[11];
-                        String cardType = row[12];
+                        String serialNumber = row[7];
+                        String validFrom = row[8];
+                        String validTo = row[9];
+                        String cardNumber = row[10];
+                        String cardType = row[11];
+                        String status = row[12];
 
-                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, path))) {
+                        if (!(validateCertificate(serialNumber, validFrom, validTo, cardNumber, cardType, status, path))) {
                             deleteFile(path);
                             throw new CertificateNotValidatedException(serialNumber);
                         }
@@ -456,6 +457,7 @@ public class FilesUtil {
                         newCertificate.setValidTo(dateValidTo);
                         newCertificate.setCardNumber(cardNumber);
                         newCertificate.setCardType(cardType);
+                        newCertificate.setStatus(status);
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(invoice.getId(), newCertificate.getId());
@@ -499,18 +501,13 @@ public class FilesUtil {
         return true;
     }
 
-    private Boolean validateInvoice(String invoiceNumber, String dateOfAgreement, String status, String path) {
+    private Boolean validateInvoice(String invoiceNumber, String dateOfAgreement, String path) {
         String invoiceRegex = "[0-9]+";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         simpleDateFormat.setLenient(true);
 
         if (!(invoiceNumber.matches(invoiceRegex)) || invoiceNumber.isEmpty()) {
             responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in invoice number field! Customers listed after weren't imported to the database due to the error.");
-            return false;
-        }
-
-        if (!(status.equals("Invoice sent")) && !(status.equals("Expired")) && !(status.equals("Resigned")) && !(status.equals("Completed")) && !(status.equals("At the competition")) && !(status.equals("Paid"))) {
-            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in status field! Use one of these: Invoice sent, Expired, Resigned, Completed, At the competition or Paid. Customers listed after weren't imported to the database due to the error.");
             return false;
         }
 
@@ -525,7 +522,7 @@ public class FilesUtil {
         return true;
     }
 
-    private Boolean validateCertificate(String serialNumber, String validFrom, String validTo, String cardNumber, String cardType, String path) {
+    private Boolean validateCertificate(String serialNumber, String validFrom, String validTo, String cardNumber, String cardType, String status, String path) {
         String cardRegex = "[0-9]+";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         simpleDateFormat.setLenient(true);
@@ -542,6 +539,11 @@ public class FilesUtil {
 
         if (cardType.isEmpty()) {
             responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in card type field! Customers listed after weren't imported to the database due to the error.");
+            return false;
+        }
+
+        if (!(status.equals("Invoice sent")) && !(status.equals("Expired")) && !(status.equals("Resigned")) && !(status.equals("Completed")) && !(status.equals("At the competition")) && !(status.equals("Paid"))) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in status field! Use one of these: Invoice sent, Expired, Resigned, Completed, At the competition or Paid. Customers listed after weren't imported to the database due to the error.");
             return false;
         }
 
@@ -610,10 +612,6 @@ public class FilesUtil {
                     dateOfAgreement.appendChild(doc.createTextNode(simpleDateFormat.format(invoice.getDateOfAgreement())));
                     invoiceList.appendChild(dateOfAgreement);
 
-                    Element status = doc.createElement("status");
-                    status.appendChild(doc.createTextNode(invoice.getStatus()));
-                    invoiceList.appendChild(status);
-
                     Element certificatesElement = doc.createElement("certificates");
                     invoiceList.appendChild(certificatesElement);
 
@@ -642,6 +640,10 @@ public class FilesUtil {
                         Element cardType = doc.createElement("cardType");
                         cardType.appendChild(doc.createTextNode(certificate.getCardType()));
                         certificateElement.appendChild(cardType);
+
+                        Element status = doc.createElement("status");
+                        status.appendChild(doc.createTextNode(certificate.getStatus()));
+                        certificateElement.appendChild(status);
                     });
                 });
             });

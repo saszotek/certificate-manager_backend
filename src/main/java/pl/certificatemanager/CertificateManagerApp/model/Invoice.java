@@ -23,7 +23,6 @@ public class Invoice {
     @Column(name = "date_of_agreement")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateOfAgreement;
-    private String status;
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "customer_id")

@@ -28,6 +28,7 @@ public class Certificate {
     private String cardNumber;
     @Column(name = "card_type")
     private String cardType;
+    private String status;
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "invoice_id")
