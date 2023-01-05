@@ -1,5 +1,7 @@
 package pl.certificatemanager.CertificateManagerApp.util;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 @Component
 @RequiredArgsConstructor
@@ -145,8 +148,7 @@ public class FilesUtil {
 
     private void saveCustomerFromXmlSchema(Document doc, String path) throws ParseException {
         ArrayList<Invoice> invoices = new ArrayList<>();
-        ArrayList<Certificate> certificates = new ArrayList<>();
-        HashMap<String, ArrayList<Certificate>> certificatesInvoice = new HashMap<>();
+        Multimap<String, Certificate> map = LinkedHashMultimap.create();
 
         NodeList customerList = doc.getElementsByTagName("customer");
 
@@ -157,7 +159,7 @@ public class FilesUtil {
                 Element elementCustomer = (Element) customer;
 
                 if (customerRepo.existsByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent())) {
-                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, certificates, certificatesInvoice);
+                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map);
 
                     Customer oldCustomer = customerRepo.findByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
                     invoices.forEach(invoice -> {
@@ -182,7 +184,7 @@ public class FilesUtil {
                     newCustomer.setEmail(email);
                     newCustomer.setCity(city);
 
-                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, certificates, certificatesInvoice);
+                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map);
 
                     customerRepo.save(newCustomer);
                     invoices.forEach(invoice -> {
@@ -190,13 +192,12 @@ public class FilesUtil {
                     });
                 }
                 invoices.clear();
-                certificates.clear();
-                certificatesInvoice.clear();
+                map.clear();
             }
         }
     }
 
-    private void parseInvoicesAndItsCertificates(String path, Element elementCustomer, ArrayList<Invoice> invoices, ArrayList<Certificate> certificates, HashMap<String, ArrayList<Certificate>> certificatesInvoice) throws ParseException {
+    private void parseInvoicesAndItsCertificates(String path, Element elementCustomer, ArrayList<Invoice> invoices, Multimap<String, Certificate> map) throws ParseException {
         NodeList invoiceList = elementCustomer.getElementsByTagName("invoice");
 
         for (int j = 0; j < invoiceList.getLength(); j++) {
@@ -265,25 +266,18 @@ public class FilesUtil {
                         newCertificate.setCardType(cardType);
                         newCertificate.setStatus(status);
 
-                        certificates.add(newCertificate);
+                        map.put(newInvoice.getInvoiceNumber(), newCertificate);
                     }
                 }
-                certificatesInvoice.put(newInvoice.getInvoiceNumber(), certificates);
             }
         }
         invoices.forEach(invoice -> {
-            if (certificatesInvoice.containsKey(invoice.getInvoiceNumber())) {
+            if (map.containsKey(invoice.getInvoiceNumber())) {
                 invoiceRepo.save(invoice);
-                for (Map.Entry<String, ArrayList<Certificate>> entry : certificatesInvoice.entrySet()) {
-                    if (invoice.getInvoiceNumber() == entry.getKey()) {
-                        ArrayList<Certificate> values = entry.getValue();
-                        values.forEach(value -> {
-                            certificateRepo.save(value);
-                            invoiceService.saveCertificateToInvoice(invoice.getId(), value.getId());
-                        });
-                        values.clear();
-                    }
-                }
+                map.get(invoice.getInvoiceNumber()).forEach(certificate -> {
+                    certificateRepo.save(certificate);
+                    invoiceService.saveCertificateToInvoice(invoice.getId(), certificate.getId());
+                });
             }
         });
     }
