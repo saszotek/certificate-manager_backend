@@ -5,11 +5,6 @@ import com.google.common.collect.Multimap;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.RequiredArgsConstructor;
-import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.component.VTimeZone;
-import net.fortuna.ical4j.util.UidGenerator;
 import org.apache.commons.io.FilenameUtils;
 import org.simplejavamail.api.email.AttachmentResource;
 import org.simplejavamail.api.email.Email;
@@ -44,7 +39,6 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 @Component
 @RequiredArgsConstructor
@@ -101,9 +95,8 @@ public class FilesUtil {
     public File saveFromDatabaseToFile(String typeOfExport) {
         if (typeOfExport.equals("customers")) {
             return saveCustomersToXml();
-        } else if (typeOfExport.equals("reminders")) {
-            saveRemindersToIcs();
         }
+
         throw new RuntimeException("Could not determine what export to make!");
     }
 
@@ -656,9 +649,5 @@ public class FilesUtil {
         } catch (Exception e) {
             throw new RuntimeException("Could not create xml file with customers! Error: " + e.getMessage());
         }
-    }
-
-    private void saveRemindersToIcs() {
-//        TODO
     }
 }

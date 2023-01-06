@@ -37,4 +37,9 @@ public class CertificateService {
         certificateRepo.delete(certificate);
         return certificate;
     }
+
+    public List<Object[]> getAllSerialNumberAndValidTo() {
+        log.info("Fetching all serial numbers and valid to");
+        return certificateRepo.findAllSerialNumberAndValidTo();
+    }
 }

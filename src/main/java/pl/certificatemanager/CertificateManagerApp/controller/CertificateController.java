@@ -36,4 +36,9 @@ public class CertificateController {
     public ResponseEntity<Certificate> deleteCertificate(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(certificateService.deleteCertificate(id));
     }
+
+    @GetMapping("/find/all/serial/and/valid")
+    public ResponseEntity<List<Object[]>> getAllSerialNumberAndValidTo() {
+        return ResponseEntity.ok().body(certificateService.getAllSerialNumberAndValidTo());
+    }
 }
