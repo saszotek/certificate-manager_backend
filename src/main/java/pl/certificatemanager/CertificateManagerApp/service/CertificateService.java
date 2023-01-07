@@ -42,4 +42,9 @@ public class CertificateService {
         log.info("Fetching all serial numbers and valid to");
         return certificateRepo.findAllSerialNumberAndValidTo();
     }
+
+    public List<Object[]> getAllSerialNumberAndValidToByInvoiceId(Long id) {
+        log.info("Fetching all serial numbers and valid to by invoice id {}", id);
+        return certificateRepo.findAllSerialNumberAndValidToByInvoiceId(id);
+    }
 }

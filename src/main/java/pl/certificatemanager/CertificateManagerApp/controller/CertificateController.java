@@ -41,4 +41,9 @@ public class CertificateController {
     public ResponseEntity<List<Object[]>> getAllSerialNumberAndValidTo() {
         return ResponseEntity.ok().body(certificateService.getAllSerialNumberAndValidTo());
     }
+
+    @GetMapping("/find/all/serial/and/valid/invoice/id/{id}")
+    public ResponseEntity<List<Object[]>> getAllSerialNumberAndValidToByInvoiceId(@PathVariable("id") Long id) {
+        return ResponseEntity.ok().body(certificateService.getAllSerialNumberAndValidToByInvoiceId(id));
+    }
 }

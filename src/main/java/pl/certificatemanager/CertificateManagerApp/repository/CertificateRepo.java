@@ -2,6 +2,7 @@ package pl.certificatemanager.CertificateManagerApp.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Invoice;
 
@@ -13,4 +14,6 @@ public interface CertificateRepo extends JpaRepository<Certificate, Long> {
     List<Certificate> findCertificatesByInvoice(Invoice invoice);
     @Query("SELECT c.serialNumber, c.validTo  FROM Certificate c")
     List<Object[]> findAllSerialNumberAndValidTo();
+    @Query("SELECT c.serialNumber, c.validTo FROM Certificate c WHERE c.invoice.id = :id")
+    List<Object[]> findAllSerialNumberAndValidToByInvoiceId(@Param("id") Long id);
 }
