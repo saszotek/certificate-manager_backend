@@ -1,6 +1,9 @@
 package pl.certificatemanager.CertificateManagerApp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +12,10 @@ import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.service.CustomerService;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/customer")
@@ -18,8 +24,28 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/find/all")
-    public ResponseEntity<List<Customer>> getCustomers() {
-        return ResponseEntity.ok().body(customerService.getCustomers());
+    public ResponseEntity<Map<String, Object>> getCustomers(@RequestParam(required = false) String lastName,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "3") int size) {
+        List<Customer> customers = new ArrayList<>();
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Customer> customerPage;
+        if (lastName == null) {
+            customerPage = customerService.getCustomers(pageable);
+        } else {
+            customerPage = customerService.getCustomersByLastName(lastName, pageable);
+        }
+
+        customers = customerPage.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("customers", customers);
+        response.put("currentPage", customerPage.getNumber());
+        response.put("totalItems", customerPage.getTotalElements());
+        response.put("totalPages", customerPage.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/find/id/{id}")

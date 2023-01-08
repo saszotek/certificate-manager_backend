@@ -2,6 +2,8 @@ package pl.certificatemanager.CertificateManagerApp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.certificatemanager.CertificateManagerApp.exception.InvoiceAlreadyAssignedCustomerException;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
@@ -20,9 +22,13 @@ public class CustomerService {
     private final CustomerRepo customerRepo;
     private final InvoiceService invoiceService;
 
-    public List<Customer> getCustomers() {
+    public Page<Customer> getCustomers(Pageable pageable) {
         log.info("Fetching all customers");
-        return customerRepo.findAll();
+        return customerRepo.findAll(pageable);
+    }
+
+    public Page<Customer> getCustomersByLastName(String lastName, Pageable pageable) {
+        return customerRepo.findByLastNameContaining(lastName, pageable);
     }
 
     public Customer getCustomerById(Long id) {
