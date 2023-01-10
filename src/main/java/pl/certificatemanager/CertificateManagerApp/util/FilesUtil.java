@@ -21,11 +21,13 @@ import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.model.Invoice;
+import pl.certificatemanager.CertificateManagerApp.payload.EmailRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.CustomerRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.InvoiceRepo;
 import pl.certificatemanager.CertificateManagerApp.service.CustomerService;
 import pl.certificatemanager.CertificateManagerApp.service.InvoiceService;
+import pl.certificatemanager.CertificateManagerApp.service.SchedulerService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,6 +40,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Component
@@ -49,6 +53,7 @@ public class FilesUtil {
     private final CustomerService customerService;
     private final InvoiceService invoiceService;
     private final ResponseMessage responseMessage;
+    private final SchedulerService schedulerService;
 
     @Value("${filesManagement.path}")
     private String directoryPath;
@@ -154,7 +159,7 @@ public class FilesUtil {
                 Element elementCustomer = (Element) customer;
 
                 if (customerRepo.existsByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent())) {
-                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map);
+                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map, elementCustomer.getElementsByTagName("email").item(0).getTextContent());
 
                     Customer oldCustomer = customerRepo.findByEmail(elementCustomer.getElementsByTagName("email").item(0).getTextContent());
                     invoices.forEach(invoice -> {
@@ -179,7 +184,7 @@ public class FilesUtil {
                     newCustomer.setEmail(email);
                     newCustomer.setCity(city);
 
-                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map);
+                    parseInvoicesAndItsCertificates(path, elementCustomer, invoices, map, elementCustomer.getElementsByTagName("email").item(0).getTextContent());
 
                     customerRepo.save(newCustomer);
                     invoices.forEach(invoice -> {
@@ -192,7 +197,7 @@ public class FilesUtil {
         }
     }
 
-    private void parseInvoicesAndItsCertificates(String path, Element elementCustomer, ArrayList<Invoice> invoices, Multimap<String, Certificate> map) throws ParseException {
+    private void parseInvoicesAndItsCertificates(String path, Element elementCustomer, ArrayList<Invoice> invoices, Multimap<String, Certificate> map, String email) throws ParseException {
         NodeList invoiceList = elementCustomer.getElementsByTagName("invoice");
 
         for (int j = 0; j < invoiceList.getLength(); j++) {
@@ -272,6 +277,11 @@ public class FilesUtil {
                 map.get(invoice.getInvoiceNumber()).forEach(certificate -> {
                     certificateRepo.save(certificate);
                     invoiceService.saveCertificateToInvoice(invoice.getId(), certificate.getId());
+
+                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 60);
+                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 30);
+                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 14);
+                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 7);
                 });
             }
         });
@@ -362,6 +372,11 @@ public class FilesUtil {
 
                     certificateRepo.save(newCertificate);
                     invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+
+                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 60);
+                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 14);
+                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 30);
+                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 7);
                 } else {
                     if (!(invoiceRepo.existsByInvoiceNumber(row[5]))) {
                         if (certificateRepo.existsBySerialNumber(row[7])) {
@@ -415,6 +430,13 @@ public class FilesUtil {
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
+
+                        String email = row[3];
+
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 60);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 30);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 14);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 7);
                     } else {
                         if (certificateRepo.existsBySerialNumber(row[7])) {
                             responseMessage.setMessage("Certificate with serial number " + row[7] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
@@ -450,6 +472,13 @@ public class FilesUtil {
 
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(invoice.getId(), newCertificate.getId());
+
+                        String email = row[3];
+
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 60);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 30);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 14);
+                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 7);
                     }
                 }
             }

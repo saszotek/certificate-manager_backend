@@ -27,8 +27,8 @@ public class CustomerService {
         return customerRepo.findAll(pageable);
     }
 
-    public Page<Customer> getCustomersByLastName(String lastName, Pageable pageable) {
-        return customerRepo.findByLastNameContaining(lastName, pageable);
+    public Page<Customer> getCustomersByEmail(String email, Pageable pageable) {
+        return customerRepo.findByEmailContaining(email, pageable);
     }
 
     public Customer getCustomerById(Long id) {

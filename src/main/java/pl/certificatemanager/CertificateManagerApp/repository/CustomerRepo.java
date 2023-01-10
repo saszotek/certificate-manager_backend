@@ -9,5 +9,5 @@ public interface CustomerRepo extends JpaRepository<Customer, Long> {
     Customer findCustomerById(Long id);
     Boolean existsByEmail(String email);
     Customer findByEmail(String email);
-    Page<Customer> findByLastNameContaining(String lastName, Pageable pageable);
+    Page<Customer> findByEmailContaining(String email, Pageable pageable);
 }

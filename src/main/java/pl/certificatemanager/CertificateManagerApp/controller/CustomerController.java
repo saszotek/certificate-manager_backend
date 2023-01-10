@@ -24,17 +24,17 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/find/all")
-    public ResponseEntity<Map<String, Object>> getCustomers(@RequestParam(required = false) String lastName,
+    public ResponseEntity<Map<String, Object>> getCustomers(@RequestParam(required = false) String email,
                                                             @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "3") int size) {
         List<Customer> customers = new ArrayList<>();
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Customer> customerPage;
-        if (lastName == null) {
+        if (email == null) {
             customerPage = customerService.getCustomers(pageable);
         } else {
-            customerPage = customerService.getCustomersByLastName(lastName, pageable);
+            customerPage = customerService.getCustomersByEmail(email, pageable);
         }
 
         customers = customerPage.getContent();

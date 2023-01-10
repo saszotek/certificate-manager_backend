@@ -57,16 +57,6 @@
 			<version>0.9.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.simplejavamail</groupId>
-			<artifactId>simple-java-mail</artifactId>
-			<version>7.5.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>jakarta.mail</artifactId>
-			<version>2.0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>jakarta.activation</groupId>
 			<artifactId>jakarta.activation-api</artifactId>
 			<version>2.0.0-RC3</version>
@@ -86,15 +76,23 @@
 			<artifactId>guava</artifactId>
 			<version>31.0.1-jre</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.mnode.ical4j</groupId>-->
-<!--			<artifactId>ical4j</artifactId>-->
-<!--			<version>3.2.7</version>-->
-<!--		</dependency>-->
 		<dependency>
-			<groupId>org.mnode.ical4j</groupId>
-			<artifactId>ical4j</artifactId>
-			<version>4.0.0-beta4</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.simplejavamail</groupId>
+			<artifactId>simple-java-mail</artifactId>
+			<version>7.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 	</dependencies>
 
