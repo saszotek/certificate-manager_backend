@@ -220,7 +220,7 @@ public class FilesUtil {
                     throw new InvoiceNotValidatedException(invoiceNumber);
                 }
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
                 Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
                 Invoice newInvoice = new Invoice();
@@ -348,7 +348,7 @@ public class FilesUtil {
 
                     customerRepo.save(newCustomer);
 
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
                     Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
 
@@ -407,7 +407,7 @@ public class FilesUtil {
 
                         Customer customer = customerRepo.findByEmail(row[3]);
 
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
                         Date dateInvoice = simpleDateFormat.parse(dateOfAgreement);
 
                         Invoice newInvoice = new Invoice();
@@ -458,7 +458,7 @@ public class FilesUtil {
 
                         Invoice invoice = invoiceRepo.findByInvoiceNumber(row[5]);
 
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
                         Date dateValidFrom = simpleDateFormat.parse(validFrom);
                         Date dateValidTo = simpleDateFormat.parse(validTo);
 
@@ -521,7 +521,7 @@ public class FilesUtil {
 
     private Boolean validateInvoice(String invoiceNumber, String dateOfAgreement, String path) {
         String invoiceRegex = "[0-9]+";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         simpleDateFormat.setLenient(true);
 
         if (!(invoiceNumber.matches(invoiceRegex)) || invoiceNumber.isEmpty()) {
@@ -532,7 +532,7 @@ public class FilesUtil {
         try {
             simpleDateFormat.parse(dateOfAgreement);
         } catch (ParseException e) {
-            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in date of agreement field! Customers listed after weren't imported to the database due to the error.");
+            responseMessage.setMessage("Invoice with invoice number " + invoiceNumber + " could not be added, because of incorrect data in date of agreement field! Example of proper date format: 1970-01-25 19:06:00 GMT. Customers listed after weren't imported to the database due to the error.");
             deleteFile(path);
             throw new InvoiceNotValidatedException(invoiceNumber);
         }
@@ -542,7 +542,7 @@ public class FilesUtil {
 
     private Boolean validateCertificate(String serialNumber, String validFrom, String validTo, String cardNumber, String cardType, String status, String path) {
         String cardRegex = "[0-9]+";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         simpleDateFormat.setLenient(true);
 
         if (serialNumber.isEmpty()) {
@@ -569,7 +569,7 @@ public class FilesUtil {
             simpleDateFormat.parse(validFrom);
             simpleDateFormat.parse(validTo);
         } catch (ParseException e) {
-            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in valid from or valid to fields! Customers listed after weren't imported to the database due to the error.");
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in valid from or valid to fields! Example of proper date format: 1970-01-25 19:06:00 GMT. Customers listed after weren't imported to the database due to the error.");
             deleteFile(path);
             throw new CertificateNotValidatedException(serialNumber);
         }
@@ -586,7 +586,7 @@ public class FilesUtil {
             Element rootElement = doc.createElement("customers");
             doc.appendChild(rootElement);
 
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
             List<Customer> customers = customerRepo.findAll();
 
             customers.forEach(customer -> {

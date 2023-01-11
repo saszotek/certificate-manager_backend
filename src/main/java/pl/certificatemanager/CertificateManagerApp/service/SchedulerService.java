@@ -46,7 +46,7 @@ public class SchedulerService {
     }
 
     public void setupEmailSchedule(String email, String serialNumber, String invoiceNumber, java.util.Date validTo, Integer sendBeforeDays) {
-        LocalDateTime dateTime = validTo.toInstant().atZone(ZoneId.of("Europe/London")).toLocalDateTime().minusDays(sendBeforeDays);
+        LocalDateTime dateTime = validTo.toInstant().atZone(ZoneId.of("CET")).toLocalDateTime().minusDays(sendBeforeDays);
 
         log.info(String.valueOf(dateTime));
 
@@ -55,7 +55,7 @@ public class SchedulerService {
         emailRequest.setSubject("Certificate " + serialNumber + " is going to expire in " + sendBeforeDays + " days.");
         emailRequest.setBody("Certificate with serial number " + serialNumber + " associated with email " + email + " and invoice " + invoiceNumber + " is going to expire in " + sendBeforeDays + " days.");
         emailRequest.setDateTime(dateTime);
-        emailRequest.setTimeZone(ZoneId.of("Europe/London"));
+        emailRequest.setTimeZone(ZoneId.of("CET"));
 
         scheduleEmail(emailRequest);
     }
