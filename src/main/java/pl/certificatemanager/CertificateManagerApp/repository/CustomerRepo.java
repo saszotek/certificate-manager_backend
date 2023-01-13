@@ -10,6 +10,7 @@ import pl.certificatemanager.CertificateManagerApp.model.Customer;
 public interface CustomerRepo extends JpaRepository<Customer, Long> {
     Customer findCustomerById(Long id);
     Boolean existsByEmail(String email);
+    Boolean existsByPhoneNumber(String phoneNumber);
     Customer findByEmail(String email);
     Page<Customer> findByEmailContaining(String email, Pageable pageable);
 }
