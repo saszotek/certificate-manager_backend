@@ -744,8 +744,8 @@ public class FilesUtil {
             return false;
         }
 
-        if (!(status.equals("Invoice sent")) && !(status.equals("Expired")) && !(status.equals("Resigned")) && !(status.equals("Completed")) && !(status.equals("At the competition")) && !(status.equals("Paid"))) {
-            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in status field! Use one of these: Invoice sent, Expired, Resigned, Completed, At the competition or Paid. Customers listed after weren't imported to the database due to the error.");
+        if (!(status.equals("Invoice sent")) && !(status.equals("Expired")) && !(status.equals("Resigned")) && !(status.equals("Completed")) && !(status.equals("Other company")) && !(status.equals("Paid"))) {
+            responseMessage.setMessage("Certificate with serial number " + serialNumber + " could not be added, because of incorrect data in status field! Use one of these: Invoice sent, Expired, Resigned, Completed, Other company or Paid. Customers listed after weren't imported to the database due to the error.");
             return false;
         }
 
