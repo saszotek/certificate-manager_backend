@@ -1,4 +1,4 @@
-package pl.certificatemanager.CertificateManagerApp.dto;
+package pl.certificatemanager.CertificateManagerApp.payload;
 
 import lombok.Data;
 

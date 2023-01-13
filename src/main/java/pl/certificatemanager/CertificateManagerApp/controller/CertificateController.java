@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
+import pl.certificatemanager.CertificateManagerApp.payload.StatusRequest;
 import pl.certificatemanager.CertificateManagerApp.service.CertificateService;
 
 import java.net.URI;
@@ -45,5 +46,10 @@ public class CertificateController {
     @GetMapping("/find/all/serial/and/valid/invoice/id/{id}")
     public ResponseEntity<List<Object[]>> getAllSerialNumberAndValidToByInvoiceId(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(certificateService.getAllSerialNumberAndValidToByInvoiceId(id));
+    }
+
+    @PutMapping("/update/{id}/status")
+    public ResponseEntity<Certificate> updateCertificateStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
+        return ResponseEntity.ok().body(certificateService.updateCertificateStatus(id, request));
     }
 }

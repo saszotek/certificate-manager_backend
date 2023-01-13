@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
+import pl.certificatemanager.CertificateManagerApp.payload.StatusRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
 
 import javax.transaction.Transactional;
@@ -46,5 +47,11 @@ public class CertificateService {
     public List<Object[]> getAllSerialNumberAndValidToByInvoiceId(Long id) {
         log.info("Fetching all serial numbers and valid to by invoice id {}", id);
         return certificateRepo.findAllSerialNumberAndValidToByInvoiceId(id);
+    }
+
+    public Certificate updateCertificateStatus(Long id, StatusRequest request) {
+        Certificate certificate = certificateRepo.findCertificateById(id);
+        certificate.setStatus(request.getStatus());
+        return certificate;
     }
 }

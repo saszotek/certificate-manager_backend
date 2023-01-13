@@ -13,7 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pl.certificatemanager.CertificateManagerApp.dto.AuthCredentialsRequest;
+import pl.certificatemanager.CertificateManagerApp.payload.AuthCredentialsRequest;
 import pl.certificatemanager.CertificateManagerApp.model.Authority;
 import pl.certificatemanager.CertificateManagerApp.model.User;
 import pl.certificatemanager.CertificateManagerApp.repository.AuthorityRepo;
