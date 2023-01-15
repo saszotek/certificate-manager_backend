@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.payload.StatusRequest;
+import pl.certificatemanager.CertificateManagerApp.payload.ValidToRequest;
 import pl.certificatemanager.CertificateManagerApp.service.CertificateService;
 
 import java.net.URI;
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -51,5 +54,10 @@ public class CertificateController {
     @PutMapping("/update/{id}/status")
     public ResponseEntity<Certificate> updateCertificateStatus(@PathVariable("id") Long id, @RequestBody StatusRequest request) {
         return ResponseEntity.ok().body(certificateService.updateCertificateStatus(id, request));
+    }
+
+    @PutMapping("/update/{id}/expiration")
+    public ResponseEntity<ResponseMessage> updateCertificateExpiration(@PathVariable("id") Long id, @RequestBody ValidToRequest validToRequest) {
+        return ResponseEntity.ok().body(certificateService.updateCertificateExpiration(id, validToRequest));
     }
 }

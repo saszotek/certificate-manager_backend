@@ -3,11 +3,16 @@ package pl.certificatemanager.CertificateManagerApp.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.payload.StatusRequest;
+import pl.certificatemanager.CertificateManagerApp.payload.ValidToRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
 
 import javax.transaction.Transactional;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -50,8 +55,30 @@ public class CertificateService {
     }
 
     public Certificate updateCertificateStatus(Long id, StatusRequest request) {
+        log.info("Updating certificate {} with status {}", id, request.getStatus());
         Certificate certificate = certificateRepo.findCertificateById(id);
         certificate.setStatus(request.getStatus());
         return certificate;
+    }
+
+    public ResponseMessage updateCertificateExpiration(Long id, ValidToRequest validToRequest) {
+        ResponseMessage responseMessage = new ResponseMessage();
+
+        try {
+            Certificate certificate = certificateRepo.findCertificateById(id);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            Date date = sdf.parse(validToRequest.getValidTo());
+
+            certificate.setValidTo(date);
+
+            log.info("Successfully extended date of certificate {} to {}", id, date);
+            responseMessage.setMessage("Successfully extended date of certificate.");
+            return responseMessage;
+        } catch (ParseException e) {
+            log.error("Could not extend date of certificate. Error: ", e);
+            responseMessage.setMessage("Could not extend date of certificate.");
+            return responseMessage;
+        }
     }
 }
