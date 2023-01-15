@@ -21,10 +21,12 @@ import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.model.Invoice;
+import pl.certificatemanager.CertificateManagerApp.model.User;
 import pl.certificatemanager.CertificateManagerApp.payload.EmailRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.CustomerRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.InvoiceRepo;
+import pl.certificatemanager.CertificateManagerApp.repository.UserRepo;
 import pl.certificatemanager.CertificateManagerApp.service.CustomerService;
 import pl.certificatemanager.CertificateManagerApp.service.InvoiceService;
 import pl.certificatemanager.CertificateManagerApp.service.SchedulerService;
@@ -54,6 +56,7 @@ public class FilesUtil {
     private final InvoiceService invoiceService;
     private final ResponseMessage responseMessage;
     private final SchedulerService schedulerService;
+    private final UserRepo userRepo;
 
     @Value("${filesManagement.path}")
     private String directoryPath;
@@ -311,6 +314,8 @@ public class FilesUtil {
                 }
             }
         }
+        List<User> users = userRepo.findAll();
+
         invoices.forEach(invoice -> {
             if (map.containsKey(invoice.getInvoiceNumber())) {
                 invoiceRepo.save(invoice);
@@ -318,10 +323,12 @@ public class FilesUtil {
                     certificateRepo.save(certificate);
                     invoiceService.saveCertificateToInvoice(invoice.getId(), certificate.getId());
 
-                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 60);
-                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 30);
-                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 14);
-                    schedulerService.setupEmailSchedule(email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 7);
+                    users.forEach(user -> {
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 60);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 30);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 14);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 7);
+                    });
                 });
             }
         });
@@ -329,6 +336,8 @@ public class FilesUtil {
 
     private void saveCustomerFromCsv(File file, String path) {
         try {
+            List<User> users = userRepo.findAll();
+
             FileReader fileReader = new FileReader(file);
             CSVReader csvReader = new CSVReaderBuilder(fileReader).withSkipLines(1).build();
             List<String[]> allData = csvReader.readAll();
@@ -419,10 +428,12 @@ public class FilesUtil {
                     certificateRepo.save(newCertificate);
                     invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
 
-                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 60);
-                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 14);
-                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 30);
-                    schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 7);
+                    users.forEach(user -> {
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
+                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
+                    });
                 } else {
                     Customer oldCustomer = customerRepo.findByEmail(row[3]);
 
@@ -514,10 +525,12 @@ public class FilesUtil {
 
                         String email = row[3];
 
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 60);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 30);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 14);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoiceNumber, dateValidTo, 7);
+                        users.forEach(user -> {
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
+                        });
                     } else {
                         if (certificateRepo.existsBySerialNumber(row[7])) {
                             responseMessage.setMessage("Certificate with serial number " + row[7] + " is already saved in the database! Customers listed after weren't imported to the database due to the error.");
@@ -556,10 +569,12 @@ public class FilesUtil {
 
                         String email = row[3];
 
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 60);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 30);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 14);
-                        schedulerService.setupEmailSchedule(email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 7);
+                        users.forEach(user -> {
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 60);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 30);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 14);
+                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 7);
+                        });
                     }
                 }
             }
