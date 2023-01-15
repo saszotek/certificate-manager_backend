@@ -17,7 +17,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class SchedulerService {
+public class SchedulerEmailService {
     private final Scheduler scheduler;
 
     public EmailResponse scheduleEmail(EmailRequest emailRequest) {

@@ -10,7 +10,7 @@ import pl.certificatemanager.CertificateManagerApp.payload.EmailRequest;
 import pl.certificatemanager.CertificateManagerApp.payload.EmailResponse;
 import pl.certificatemanager.CertificateManagerApp.payload.UserEmailRequest;
 import pl.certificatemanager.CertificateManagerApp.service.CertificateService;
-import pl.certificatemanager.CertificateManagerApp.service.SchedulerService;
+import pl.certificatemanager.CertificateManagerApp.service.SchedulerEmailService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -19,7 +19,7 @@ import java.time.ZoneId;
 @RequestMapping("/api/schedule")
 @RequiredArgsConstructor
 public class SchedulerController {
-    private final SchedulerService schedulerService;
+    private final SchedulerEmailService schedulerEmailService;
     private final CertificateService certificateService;
 
     @PostMapping("/email/certificate/{id}")
@@ -38,6 +38,6 @@ public class SchedulerController {
         emailRequest.setDateTime(dateTime);
         emailRequest.setTimeZone(ZoneId.of("CET"));
 
-        return ResponseEntity.ok().body(schedulerService.scheduleEmail(emailRequest));
+        return ResponseEntity.ok().body(schedulerEmailService.scheduleEmail(emailRequest));
     }
 }

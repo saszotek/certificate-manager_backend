@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface CertificateRepo extends JpaRepository<Certificate, Long> {
     Certificate findCertificateById(Long id);
+    Certificate findCertificateBySerialNumber(String serialNumber);
     Boolean existsBySerialNumber(String serialNumber);
     List<Certificate> findCertificatesByInvoice(Invoice invoice);
     @Query("SELECT c.serialNumber, c.validTo  FROM Certificate c")

@@ -22,14 +22,15 @@ import pl.certificatemanager.CertificateManagerApp.model.Certificate;
 import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.model.Invoice;
 import pl.certificatemanager.CertificateManagerApp.model.User;
-import pl.certificatemanager.CertificateManagerApp.payload.EmailRequest;
+import pl.certificatemanager.CertificateManagerApp.payload.SchedulerStatusRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.CustomerRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.InvoiceRepo;
 import pl.certificatemanager.CertificateManagerApp.repository.UserRepo;
 import pl.certificatemanager.CertificateManagerApp.service.CustomerService;
 import pl.certificatemanager.CertificateManagerApp.service.InvoiceService;
-import pl.certificatemanager.CertificateManagerApp.service.SchedulerService;
+import pl.certificatemanager.CertificateManagerApp.service.SchedulerEmailService;
+import pl.certificatemanager.CertificateManagerApp.service.SchedulerStatusService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,7 +56,8 @@ public class FilesUtil {
     private final CustomerService customerService;
     private final InvoiceService invoiceService;
     private final ResponseMessage responseMessage;
-    private final SchedulerService schedulerService;
+    private final SchedulerEmailService schedulerEmailService;
+    private final SchedulerStatusService schedulerStatusService;
     private final UserRepo userRepo;
 
     @Value("${filesManagement.path}")
@@ -323,11 +325,21 @@ public class FilesUtil {
                     certificateRepo.save(certificate);
                     invoiceService.saveCertificateToInvoice(invoice.getId(), certificate.getId());
 
+                    LocalDateTime dateTime = certificate.getValidTo().toInstant().atZone(ZoneId.of("CET")).toLocalDateTime();
+
+                    SchedulerStatusRequest schedulerStatusRequest = new SchedulerStatusRequest();
+                    schedulerStatusRequest.setSerialNumber(certificate.getSerialNumber());
+                    schedulerStatusRequest.setStatus("Expired");
+                    schedulerStatusRequest.setDateTime(dateTime);
+                    schedulerStatusRequest.setTimeZone(ZoneId.of("CET"));
+
+                    schedulerStatusService.setStatus(schedulerStatusRequest);
+
                     users.forEach(user -> {
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 60);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 30);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 14);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 7);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 60);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 30);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 14);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, certificate.getSerialNumber(), invoice.getInvoiceNumber(), certificate.getValidTo(), 7);
                     });
                 });
             }
@@ -428,11 +440,21 @@ public class FilesUtil {
                     certificateRepo.save(newCertificate);
                     invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
 
+                    LocalDateTime dateTime = dateValidTo.toInstant().atZone(ZoneId.of("CET")).toLocalDateTime();
+
+                    SchedulerStatusRequest schedulerStatusRequest = new SchedulerStatusRequest();
+                    schedulerStatusRequest.setSerialNumber(serialNumber);
+                    schedulerStatusRequest.setStatus("Expired");
+                    schedulerStatusRequest.setDateTime(dateTime);
+                    schedulerStatusRequest.setTimeZone(ZoneId.of("CET"));
+
+                    schedulerStatusService.setStatus(schedulerStatusRequest);
+
                     users.forEach(user -> {
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
-                        schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
+                        schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
                     });
                 } else {
                     Customer oldCustomer = customerRepo.findByEmail(row[3]);
@@ -523,13 +545,23 @@ public class FilesUtil {
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(newInvoice.getId(), newCertificate.getId());
 
+                        LocalDateTime dateTime = dateValidTo.toInstant().atZone(ZoneId.of("CET")).toLocalDateTime();
+
+                        SchedulerStatusRequest schedulerStatusRequest = new SchedulerStatusRequest();
+                        schedulerStatusRequest.setSerialNumber(serialNumber);
+                        schedulerStatusRequest.setStatus("Expired");
+                        schedulerStatusRequest.setDateTime(dateTime);
+                        schedulerStatusRequest.setTimeZone(ZoneId.of("CET"));
+
+                        schedulerStatusService.setStatus(schedulerStatusRequest);
+
                         String email = row[3];
 
                         users.forEach(user -> {
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 60);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 14);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 30);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoiceNumber, dateValidTo, 7);
                         });
                     } else {
                         if (certificateRepo.existsBySerialNumber(row[7])) {
@@ -567,13 +599,23 @@ public class FilesUtil {
                         certificateRepo.save(newCertificate);
                         invoiceService.saveCertificateToInvoice(invoice.getId(), newCertificate.getId());
 
+                        LocalDateTime dateTime = dateValidTo.toInstant().atZone(ZoneId.of("CET")).toLocalDateTime();
+
+                        SchedulerStatusRequest schedulerStatusRequest = new SchedulerStatusRequest();
+                        schedulerStatusRequest.setSerialNumber(serialNumber);
+                        schedulerStatusRequest.setStatus("Expired");
+                        schedulerStatusRequest.setDateTime(dateTime);
+                        schedulerStatusRequest.setTimeZone(ZoneId.of("CET"));
+
+                        schedulerStatusService.setStatus(schedulerStatusRequest);
+
                         String email = row[3];
 
                         users.forEach(user -> {
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 60);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 30);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 14);
-                            schedulerService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 7);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 60);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 30);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 14);
+                            schedulerEmailService.setupEmailSchedule(user.getUsername(), email, serialNumber, invoice.getInvoiceNumber(), dateValidTo, 7);
                         });
                     }
                 }
