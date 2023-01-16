@@ -2,6 +2,7 @@ package pl.certificatemanager.CertificateManagerApp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.*;
 import org.springframework.stereotype.Service;
 import pl.certificatemanager.CertificateManagerApp.message.ResponseMessage;
 import pl.certificatemanager.CertificateManagerApp.model.Certificate;
@@ -31,6 +32,7 @@ public class CertificateService {
     private final SchedulerStatusService schedulerStatusService;
     private final SchedulerEmailService schedulerEmailService;
     private final UserService userService;
+    private final Scheduler scheduler;
 
     public List<Certificate> getCertificates() {
         log.info("Fetching all certificates");
@@ -81,6 +83,14 @@ public class CertificateService {
             Date date = sdf.parse(validToRequest.getValidTo());
 
             certificate.setValidTo(date);
+
+            try {
+                JobDetail jobDetail = scheduler.getJobDetail(new JobKey(validToRequest.getSerialNumber(), "status-jobs"));
+                scheduler.deleteJob(jobDetail.getKey());
+                log.info("Previous JobDetail deleted successfully.");
+            } catch (SchedulerException e) {
+                log.error("Could not delete previous JobDetail. Error: ", e);
+            }
 
             Invoice invoice = certificate.getInvoice();
             Customer customer = invoice.getCustomer();

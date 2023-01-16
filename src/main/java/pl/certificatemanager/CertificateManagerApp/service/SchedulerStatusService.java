@@ -47,7 +47,7 @@ public class SchedulerStatusService {
         jobDataMap.put("status", schedulerStatusRequest.getStatus());
 
         return JobBuilder.newJob(StatusJob.class)
-                .withIdentity(UUID.randomUUID().toString(), "status-jobs")
+                .withIdentity(schedulerStatusRequest.getSerialNumber(), "status-jobs")
                 .withDescription("Set Status Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

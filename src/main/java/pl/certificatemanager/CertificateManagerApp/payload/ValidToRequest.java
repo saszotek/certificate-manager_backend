@@ -7,4 +7,5 @@ import lombok.Data;
 public class ValidToRequest {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private String validTo;
+    private String serialNumber;
 }
