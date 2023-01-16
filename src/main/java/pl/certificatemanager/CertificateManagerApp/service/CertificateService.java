@@ -85,11 +85,34 @@ public class CertificateService {
             certificate.setValidTo(date);
 
             try {
-                JobDetail jobDetail = scheduler.getJobDetail(new JobKey(validToRequest.getSerialNumber(), "status-jobs"));
-                scheduler.deleteJob(jobDetail.getKey());
-                log.info("Previous JobDetail deleted successfully.");
+                JobDetail jobDetailStatus = scheduler.getJobDetail(new JobKey(certificate.getSerialNumber(), "status-jobs"));
+                scheduler.deleteJob(jobDetailStatus.getKey());
+
+                log.info("Previous JobDetail regarding status was deleted successfully.");
+
+                JobDetail jobDetailBeforeDays60 = scheduler.getJobDetail(new JobKey(certificate.getSerialNumber() + "-60", "email-jobs"));
+                if (jobDetailBeforeDays60 != null) {
+                    scheduler.deleteJob(jobDetailBeforeDays60.getKey());
+                }
+
+                JobDetail jobDetailBeforeDays30 = scheduler.getJobDetail(new JobKey(certificate.getSerialNumber() + "-30", "email-jobs"));
+                if (jobDetailBeforeDays30 != null) {
+                    scheduler.deleteJob(jobDetailBeforeDays30.getKey());
+                }
+
+                JobDetail jobDetailBeforeDays14 = scheduler.getJobDetail(new JobKey(certificate.getSerialNumber() + "-14", "email-jobs"));
+                if (jobDetailBeforeDays14 != null) {
+                    scheduler.deleteJob(jobDetailBeforeDays14.getKey());
+                }
+
+                JobDetail jobDetailBeforeDays7 = scheduler.getJobDetail(new JobKey(certificate.getSerialNumber() + "-7", "email-jobs"));
+                if (jobDetailBeforeDays7 != null) {
+                    scheduler.deleteJob(jobDetailBeforeDays7.getKey());
+                }
+
+                log.info("Previous JobDetail regarding scheduled emails was deleted successfully.");
             } catch (SchedulerException e) {
-                log.error("Could not delete previous JobDetail. Error: ", e);
+                log.error("Could not delete previous JobDetail regarding status or scheduled emails. Error: ", e);
             }
 
             Invoice invoice = certificate.getInvoice();

@@ -14,6 +14,7 @@ import pl.certificatemanager.CertificateManagerApp.service.SchedulerEmailService
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
 @RequestMapping("/api/schedule")
@@ -37,6 +38,8 @@ public class SchedulerController {
         emailRequest.setBody("Certificate with serial number " + certificate.getSerialNumber() + " associated with email " + customer.getEmail() + " and invoice " + invoice.getInvoiceNumber() + " is going to expire at " + certificate.getValidTo() + ".");
         emailRequest.setDateTime(dateTime);
         emailRequest.setTimeZone(ZoneId.of("CET"));
+        emailRequest.setSerialNumber(certificate.getSerialNumber());
+        emailRequest.setBeforeDays("+" + ThreadLocalRandom.current().nextInt());
 
         return ResponseEntity.ok().body(schedulerEmailService.scheduleEmail(emailRequest));
     }

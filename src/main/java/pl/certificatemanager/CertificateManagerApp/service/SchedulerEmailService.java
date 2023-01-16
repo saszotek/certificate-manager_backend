@@ -12,7 +12,6 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,6 +55,8 @@ public class SchedulerEmailService {
         emailRequest.setBody("Certificate with serial number " + serialNumber + " associated with email " + emailCustomer + " and invoice " + invoiceNumber + " is going to expire in " + sendBeforeDays + " days.");
         emailRequest.setDateTime(dateTime);
         emailRequest.setTimeZone(ZoneId.of("CET"));
+        emailRequest.setSerialNumber(serialNumber);
+        emailRequest.setBeforeDays("-" + sendBeforeDays);
 
         scheduleEmail(emailRequest);
     }
@@ -68,7 +69,7 @@ public class SchedulerEmailService {
         jobDataMap.put("body", scheduleEmailRequest.getBody());
 
         return JobBuilder.newJob(EmailJob.class)
-                .withIdentity(UUID.randomUUID().toString(), "email-jobs")
+                .withIdentity(scheduleEmailRequest.getSerialNumber() + scheduleEmailRequest.getBeforeDays(), "email-jobs")
                 .withDescription("Send Email Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

@@ -12,4 +12,6 @@ public class EmailRequest {
     private String body;
     private LocalDateTime dateTime;
     private ZoneId timeZone;
+    private String serialNumber;
+    private String beforeDays;
 }
