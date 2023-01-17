@@ -30,7 +30,7 @@ public class SchedulerController {
         Invoice invoice = certificate.getInvoice();
         Customer customer = invoice.getCustomer();
 
-        LocalDateTime dateTime = LocalDateTime.now().atZone(ZoneId.of("CET")).toLocalDateTime().plusDays(3);
+        LocalDateTime dateTime = LocalDateTime.now().atZone(ZoneId.of("CET")).toLocalDateTime().plusDays(1);
 
         EmailRequest emailRequest = new EmailRequest();
         emailRequest.setEmail(userEmailRequest.getEmail());
