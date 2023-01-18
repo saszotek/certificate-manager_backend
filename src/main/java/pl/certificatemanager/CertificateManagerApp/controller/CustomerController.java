@@ -12,7 +12,6 @@ import pl.certificatemanager.CertificateManagerApp.model.Customer;
 import pl.certificatemanager.CertificateManagerApp.service.CustomerService;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +24,18 @@ public class CustomerController {
 
     @GetMapping("/find/all")
     public ResponseEntity<Map<String, Object>> getCustomers(@RequestParam(required = false) String email,
+                                                            @RequestParam(defaultValue = "asc") String order,
                                                             @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "3") int size) {
-        List<Customer> customers = new ArrayList<>();
+        List<Customer> customers;
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Customer> customerPage;
-        if (email == null) {
-            customerPage = customerService.getCustomers(pageable);
+
+        if (email.equals("") && order.equals("asc")) {
+            customerPage = customerService.getCustomersByValidToAsc(pageable);
+        } else if (email.equals("") && order.equals("desc")) {
+            customerPage = customerService.getCustomersByValidToDesc(pageable);
         } else {
             customerPage = customerService.getCustomersByEmail(email, pageable);
         }

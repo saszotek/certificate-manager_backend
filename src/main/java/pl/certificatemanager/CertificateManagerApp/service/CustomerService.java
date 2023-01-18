@@ -11,7 +11,6 @@ import pl.certificatemanager.CertificateManagerApp.model.Invoice;
 import pl.certificatemanager.CertificateManagerApp.repository.CustomerRepo;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -27,7 +26,18 @@ public class CustomerService {
         return customerRepo.findAll(pageable);
     }
 
+    public Page<Customer> getCustomersByValidToAsc(Pageable pageable) {
+        log.info("Fetching all customers ordered by ascending expiration date of certificate");
+        return customerRepo.findCustomersByValidToAsc(pageable);
+    }
+
+    public Page<Customer> getCustomersByValidToDesc(Pageable pageable) {
+        log.info("Fetching all customers ordered by descending expiration date of certificate");
+        return customerRepo.findCustomersByValidToDesc(pageable);
+    }
+
     public Page<Customer> getCustomersByEmail(String email, Pageable pageable) {
+        log.info("Fetching all customers filtered by email");
         return customerRepo.findByEmailContaining(email, pageable);
     }
 
