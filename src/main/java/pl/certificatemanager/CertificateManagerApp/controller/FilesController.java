@@ -1,6 +1,8 @@
 package pl.certificatemanager.CertificateManagerApp.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,9 +26,15 @@ public class FilesController {
     private final FilesService filesService;
     private final ResponseMessage responseMessage;
 
+    @Value("${filesManagement.path}")
+    private String directoryPath;
+
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFiles(@RequestParam("files") MultipartFile[] files) {
         try {
+            File directory = new File(directoryPath);
+            FileUtils.cleanDirectory(directory);
+
             List<String> fileNames = new ArrayList<>();
 
             Arrays.asList(files).stream().forEach(file -> {
