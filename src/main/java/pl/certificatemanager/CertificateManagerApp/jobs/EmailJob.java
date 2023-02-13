@@ -30,7 +30,7 @@ public class EmailJob extends QuartzJobBean {
 
     private void sendMail(String recipientEmail, String subject, String body) {
         String fromEmail = "testertest123@o2.pl";
-        String password = "zaq1@WSX";
+        String password = "zaq1@WSXzaq1@WSX";
 
         Properties props = new Properties();
 

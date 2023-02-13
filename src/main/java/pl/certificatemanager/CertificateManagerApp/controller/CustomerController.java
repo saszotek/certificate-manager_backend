@@ -26,7 +26,7 @@ public class CustomerController {
     public ResponseEntity<Map<String, Object>> getCustomers(@RequestParam(required = false) String email,
                                                             @RequestParam(defaultValue = "asc") String order,
                                                             @RequestParam(defaultValue = "0") int page,
-                                                            @RequestParam(defaultValue = "3") int size) {
+                                                            @RequestParam(defaultValue = "5") int size) {
         List<Customer> customers;
         Pageable pageable = PageRequest.of(page, size);
 
