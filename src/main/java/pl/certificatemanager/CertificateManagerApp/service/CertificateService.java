@@ -13,6 +13,8 @@ import pl.certificatemanager.CertificateManagerApp.payload.SchedulerStatusReques
 import pl.certificatemanager.CertificateManagerApp.payload.StatusRequest;
 import pl.certificatemanager.CertificateManagerApp.payload.ValidToRequest;
 import pl.certificatemanager.CertificateManagerApp.repository.CertificateRepo;
+import pl.certificatemanager.CertificateManagerApp.repository.CustomerRepo;
+import pl.certificatemanager.CertificateManagerApp.util.MailUtil;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
@@ -29,10 +31,12 @@ import java.util.List;
 @Slf4j
 public class CertificateService {
     private final CertificateRepo certificateRepo;
+    private final CustomerRepo customerRepo;
     private final SchedulerStatusService schedulerStatusService;
     private final SchedulerEmailService schedulerEmailService;
     private final UserService userService;
     private final Scheduler scheduler;
+    private final MailUtil mailUtil;
 
     public List<Certificate> getCertificates() {
         log.info("Fetching all certificates");
@@ -70,6 +74,8 @@ public class CertificateService {
         log.info("Updating certificate {} with status {}", id, request.getStatus());
         Certificate certificate = certificateRepo.findCertificateById(id);
         certificate.setStatus(request.getStatus());
+        Customer customer = customerRepo.findCustomerBySerialNumber(certificate.getSerialNumber());
+        mailUtil.sendMail(customer.getEmail(), "Updated status of certificate " + certificate.getSerialNumber(), "Your certificate of serial number " + certificate.getSerialNumber() + " has been updated with a new status: " + request.getStatus() + ".");
         return certificate;
     }
 
@@ -139,6 +145,7 @@ public class CertificateService {
 
             log.info("Successfully extended date of certificate {} to {}", id, date);
             responseMessage.setMessage("Successfully extended date of certificate.");
+            mailUtil.sendMail(customer.getEmail(), "The validity of the certificate " + certificate.getSerialNumber() + " has been extended", "Your certificate of serial number " + certificate.getSerialNumber() + " has been extended and is now valid until " + validToRequest.getValidTo() + ".");
             return responseMessage;
         } catch (ParseException e) {
             log.error("Could not extend date of certificate. Error: ", e);
