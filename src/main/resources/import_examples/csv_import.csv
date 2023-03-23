@@ -1,0 +1,5 @@
+firstName,lastName,phoneNumber,email,city,invoiceNumber,dateOfAgreement,serialNumber,validFrom,validTo,cardNumber,cardType,status
+Zuzanna,Koronka,974382729,koronka@gmail.com,Gdów,1662810435027,2015-02-29 06:00:00 CET,97c194533f5d8a59fceeb5149b6ffe9e5d9501c888788fb2251,2015-02-29 06:00:00 CET,2023-05-29 06:00:00 CET,9803865619420,fizyczna,Invoice sent
+Zuzanna,Koronka,974382729,koronka@gmail.com,Gdów,1662810435027,2015-02-29 06:00:00 CET,5a09277cdb1811b86f2042742ef21c3d896ba35f9aa1701aaf5a0,2016-02-29 06:00:00 CET,2024-10-29 06:00:00 CET,9717775806686,fizyczna,Invoice sent
+Maciej,Maciejowski,719667773,maciejowski@gmail.com,Kraków,3603758985377,2020-05-05 16:00:00 CET,a4bcaa8fb728044f4e164b977b16bf8f5a6de7636bf641a44b6ad,2020-05-05 16:00:00 CET,2024-05-05 16:00:00 CET,8392516794668,fizyczna,Completed
+Maciej,Maciejowski,719667773,maciejowski@gmail.com,Kraków,9812304979320,2022-05-05 16:00:00 CET,a85ff49519307a2b55127e2b8a88330763036fdbc6bcd99ae6,2022-05-05 16:00:00 CET,2026-05-05 16:00:00 CET,5167288481502,fizyczna,Paid

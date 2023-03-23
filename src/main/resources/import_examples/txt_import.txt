@@ -1,0 +1,70 @@
+<customers>
+    <customer>
+        <firstName>Tomek</firstName>
+        <lastName>Tomkowski</lastName>
+        <phoneNumber>360629821</phoneNumber>
+        <email>tomkowski@gmail.com</email>
+        <city>Sosnowiec</city>
+        <invoices>
+            <invoice>
+                <invoiceNumber>9457183415227</invoiceNumber>
+                <dateOfAgreement>2019-02-22 06:00:00 GMT</dateOfAgreement>
+                <certificates>
+                    <certificate>
+                        <serialNumber>7571276aa3bd76555ce6241b1afcce9dea1559da6afee</serialNumber>
+                        <validFrom>2019-02-22 06:00:00 GMT</validFrom>
+                        <validTo>2023-10-10 06:00:00 GMT</validTo>
+                        <cardNumber>8176140239336</cardNumber>
+                        <cardType>fizyczna</cardType>
+                        <status>Completed</status>
+                    </certificate>
+                    <certificate>
+                        <serialNumber>5eaca7092b5c14a96dabe250fa67de8791817e487</serialNumber>
+                        <validFrom>2020-05-15 15:00:00 GMT</validFrom>
+                        <validTo>2024-05-15 15:00:00 GMT</validTo>
+                        <cardNumber>3148653903274</cardNumber>
+                        <cardType>SimplySign</cardType>
+                        <status>Paid</status>
+                    </certificate>
+                </certificates>
+            </invoice>
+            <invoice>
+                <invoiceNumber>6403880647657</invoiceNumber>
+                <dateOfAgreement>2021-12-12 14:00:00 GMT</dateOfAgreement>
+                <certificates>
+                    <certificate>
+                        <serialNumber>959280b7d7802c90cd36367a21ef40f3ca7</serialNumber>
+                        <validFrom>2021-12-12 14:00:00 GMT</validFrom>
+                        <validTo>2024-12-12 14:00:00 GMT</validTo>
+                        <cardNumber>7762841756158</cardNumber>
+                        <cardType>fizyczna</cardType>
+                        <status>Paid</status>
+                    </certificate>
+                </certificates>
+            </invoice>
+        </invoices>
+    </customer>
+    <customer>
+        <firstName>Maria</firstName>
+        <lastName>Mariowska</lastName>
+        <phoneNumber>898917768</phoneNumber>
+        <email>mariowska@gmail.com</email>
+        <city>Warszawa</city>
+        <invoices>
+            <invoice>
+                <invoiceNumber>1315267991088</invoiceNumber>
+                <dateOfAgreement>2022-03-22 17:00:00 GMT</dateOfAgreement>
+                <certificates>
+                    <certificate>
+                        <serialNumber>a7395daf18822ec1e32fd93fad5ac1aea736e3f580b</serialNumber>
+                        <validFrom>2022-03-22 17:00:00 GMT</validFrom>
+                        <validTo>2025-03-22 17:00:00 GMT</validTo>
+                        <cardNumber>7145268846260</cardNumber>
+                        <cardType>fizyczna</cardType>
+                        <status>Paid</status>
+                    </certificate>
+                </certificates>
+            </invoice>
+        </invoices>
+    </customer>
+</customers>
